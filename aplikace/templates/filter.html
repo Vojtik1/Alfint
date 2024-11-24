@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Stock Analysis{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title has-text-centered" style="color: #6a0dad;">Stock Overview</h1>
+        <form method="get" class="box" style="border-top: 4px solid #6a0dad; display: flex; flex-wrap: wrap; gap: 1rem;">
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Minimum P/E Ratio</label>
+                <div class="control">
+                    <input class="input" type="number" step="0.01" name="pe_ratio_min" placeholder="Enter minimum P/E ratio">
+                </div>
+            </div>
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Maximum P/E Ratio</label>
+                <div class="control">
+                    <input class="input" type="number" step="0.01" name="pe_ratio_max" placeholder="Enter maximum P/E ratio">
+                </div>
+            </div>
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Minimum ROE (%)</label>
+                <div class="control">
+                    <input class="input" type="number" step="0.01" name="roe_min" placeholder="Enter minimum ROE">
+                </div>
+            </div>
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Maximum ROE (%)</label>
+                <div class="control">
+                    <input class="input" type="number" step="0.01" name="roe_max" placeholder="Enter maximum ROE">
+                </div>
+            </div>
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Minimum Debt to Equity Ratio</label>
+                <div class="control">
+                    <input class="input" type="number" step="0.01" name="de_ratio_min" placeholder="Enter minimum Debt to Equity ratio">
+                </div>
+            </div>
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Maximum Debt to Equity Ratio</label>
+                <div class="control">
+                    <input class="input" type="number" step="0.01" name="de_ratio_max" placeholder="Enter maximum Debt to Equity ratio">
+                </div>
+            </div>
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Minimum Market Cap</label>
+                <div class="control">
+                    <input class="input" type="number" name="market_cap_min" placeholder="Enter minimum market cap">
+                </div>
+            </div>
+            <div class="field" style="flex: 1 1 calc(33.333% - 1rem);">
+                <label class="label">Maximum Market Cap</label>
+                <div class="control">
+                    <input class="input" type="number" name="market_cap_max" placeholder="Enter maximum market cap">
+                </div>
+            </div>
+            <div class="control" style="flex: 1 1 100%; text-align: center;">
+                <button class="button is-link" type="submit">Filter</button>
+            </div>
+        </form>
+        {% if average_return %}
+            <div class="notification is-primary">
+                <p>Average Return of Filtered Stocks: {{ average_return }}%</p>
+            </div>
+        {% endif %}
+
+        {% if user.is_authenticated and user.portfolios.exists %}
+        <form method="post" action="{% url 'add_all_filtered_to_portfolio' %}">
+            {% csrf_token %}
+            <div class="field">
+                <label class="label">Select Portfolio</label>
+                <div class="control">
+                    <div class="select">
+                        <select name="portfolio_id" required>
+                            {% for portfolio in user.portfolios.all %}
+                                <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="control" style="text-align: center; margin-top: 20px;">
+                <button class="button is-link" type="submit">Add All to Portfolio</button>
+            </div>
+            <input type="hidden" name="filtered_tickers" value="{{ stocks|join:',' }}">
+        </form>
+        {% endif %}
+
+        <div class="columns is-multiline">
+            {% for stock in stocks %}
+                <div class="column is-one-quarter">
+                    <div class="box" style="border-top: 4px solid #6a0dad;">
+                        <h2 class="subtitle" style="color: #6a0dad;">{{ stock.name }}</h2>
+                        <p><strong>P/E Ratio:</strong> {{ stock.pe_ratio|floatformat:2|default:"N/A" }}</p>
+                        <p><strong>ROE (%):</strong> {{ stock.roe|floatformat:2|default:"N/A" }}</p>
+                        <p><strong>Debt to Equity Ratio:</strong> {{ stock.debt_to_equity|floatformat:2|default:"N/A" }}</p>
+                        <p><strong>Ticker:</strong> {{ stock.ticker }}</p>
+                        <p><strong>Market Cap:</strong> {{ stock.market_cap|floatformat:2|default:"N/A" }}</p>
+                        <p><strong>ROA (%):</strong> {{ stock.roa|floatformat:2|default:"N/A" }}</p>
+                        <a href="/stock/{{ stock.ticker }}" class="button is-link is-light mt-3">View Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

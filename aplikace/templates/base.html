@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Stock Analysis{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.3/css/bulma.min.css">
+    <style>
+        body {
+            background-color: #f3f0f7;
+            color: #4a4a4a;
+        }
+        .navbar {
+            background-color: #6a0dad;
+            color: white;
+        }
+        .navbar-item, .navbar-brand {
+            color: white;
+        }
+        footer {
+            background-color: #6a0dad;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <strong style="color: white;">Stock Picker</strong>
+            </a>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        {% block content %}{% endblock %}
+    </div>
+    <footer>
+        <p>Stock Analysis &copy; 2024. Powered by Django & Celery.</p>
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

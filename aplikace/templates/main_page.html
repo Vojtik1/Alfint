@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Portfolio Sharing{% endblock %}
+
+{% block content %}
+    <h1>Welcome to Portfolio Sharing</h1>
+
+  {% if user.is_authenticated %}
+    <p>Hello, {{ user.username }}!</p>
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+{% else %}
+    <p>You are not logged in. <a href="{% url 'login' %}">Login here</a></p>
+{% endif %}
+
+
+    <p>Select one of the options below:</p>
+    <ul>
+        <li><a href="/create_portfolio">Create a portfolio manually</a></li>
+        <li><a href="/filter">Use a filter to select stocks</a></li>
+    </ul>
+
+
+
+{% endblock %}

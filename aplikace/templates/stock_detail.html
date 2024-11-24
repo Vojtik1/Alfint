@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ stock.name }} Details{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title has-text-centered" style="color: #6a0dad;">{{ stock.name }} ({{ stock.ticker }})</h1>
+        <div class="box" style="border-top: 4px solid #6a0dad;">
+            <h2 class="subtitle">Basic Information</h2>
+            <p><strong>Market Cap:</strong> {{ stock.market_cap }}</p>
+            <p><strong>Last Price:</strong> {{ stock.last_price}}</p>
+            <p><strong>P/E Ratio:</strong> {{ stock.pe_ratio }}</p>
+            <p><strong>Beta:</strong> {{ stock.beta}}</p>
+        </div>
+        {% if chart_image %}
+            <div class="box" style="border-top: 4px solid #6a0dad;">
+                <h2 class="subtitle">Stock Price Chart</h2>
+                <img src="data:image/png;base64,{{ chart_image }}" alt="Stock Price Chart">
+            </div>
+        {% endif %}
+        <div class="box" style="border-top: 4px solid #6a0dad;">
+            <h2 class="subtitle">Financial Statements</h2>
+            <div class="content">
+                <h3>Income Statements</h3>
+                <ul>
+                    {% for statement in income_statements %}
+                        <li><strong>{{ statement.fiscal_year }}:</strong> Revenue: {{ statement.revenue }}, Net Income: {{ statement.net_income }}</li>
+                    {% endfor %}
+                </ul>
+                <h3>Balance Sheets</h3>
+                <ul>
+                    {% for statement in balance_sheets %}
+                        <li><strong>{{ statement.fiscal_year }}:</strong> Total Assets: {{ statement.total_assets }}, Total Liabilities: {{ statement.total_liabilities }}</li>
+                    {% endfor %}
+                </ul>
+                <h3>Cash Flow Statements</h3>
+                <ul>
+                    {% for statement in cash_flow_statements %}
+                        <li><strong>{{ statement.fiscal_year }}:</strong> Operating Cash Flow: {{ statement.operating_cash_flow }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
