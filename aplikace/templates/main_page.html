@@ -3,25 +3,50 @@
 {% block title %}Home - Portfolio Sharing{% endblock %}
 
 {% block content %}
-    <h1>Welcome to Portfolio Sharing</h1>
+<section class="section">
+    <div class="container">
+        <h1 class="title has-text-centered">Welcome to Portfolio Sharing</h1>
 
-  {% if user.is_authenticated %}
-    <p>Hello, {{ user.username }}!</p>
-    <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>
-{% else %}
-    <p>You are not logged in. <a href="{% url 'login' %}">Login here</a></p>
-{% endif %}
+        <div class="box">
+            {% if user.is_authenticated %}
+                <p class="has-text-weight-bold">Hello, {{ user.username }}!</p>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="button is-danger is-light" type="submit">Logout</button>
+                </form>
+            {% else %}
+                <p>You are not logged in. <a href="{% url 'login' %}">Login here</a></p>
+            {% endif %}
+        </div>
 
+        <div class="card mt-5">
+            <header class="card-header">
+                <p class="card-header-title">Sdílená portfolia</p>
+            </header>
+            <div class="card-content">
+                <ul>
+                    {% if shared_portfolios %}
+                        {% for portfolio in shared_portfolios %}
+                            <li>
+                                <a href="{% url 'view_portfolio' portfolio.id %}">{{ portfolio.name }}</a>
+                                ({{ portfolio.user.username }})
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <p>No shared portfolios available.</p>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
 
-    <p>Select one of the options below:</p>
-    <ul>
-        <li><a href="/create_portfolio">Create a portfolio manually</a></li>
-        <li><a href="/filter">Use a filter to select stocks</a></li>
-    </ul>
-
-
-
+        <div class="box mt-5">
+            <h2 class="title is-4">Select one of the options below:</h2>
+            <ul>
+                <li><a href="/create_portfolio" class="button is-link is-light mt-2">Create a portfolio manually</a></li>
+                <li><a href="/filter" class="button is-link is-light mt-2">Use a filter to select stocks</a></li>
+                <li><a href="{% url 'user_portfolios' %}" class="button is-link is-light mt-2">View your portfolios</a></li>
+            </ul>
+        </div>
+    </div>
+</section>
 {% endblock %}

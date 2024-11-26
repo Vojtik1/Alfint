@@ -116,6 +116,7 @@ class CustomUser(AbstractUser):
 class Portfolio(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='portfolios')
     name = models.CharField(max_length=255, default='My Portfolio')
+    is_shared = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'name')

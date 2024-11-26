@@ -12,4 +12,9 @@ urlpatterns = [
     path('stock/<str:ticker>/', views.stock_detail, name='stock_detail'),
     path('signup/', views.signup, name='signup'),
     path('add_all_filtered_to_portfolio/', views.add_all_filtered_to_portfolio, name='add_all_filtered_to_portfolio'),
+    path('user_portfolios/', views.user_portfolios, name='user_portfolios'),
+    path('portfolio/<int:portfolio_id>/', views.view_portfolio, name='view_portfolio'),
+    path('portfolio/<int:portfolio_id>/toggle_share/', views.toggle_share, name='toggle_share'),
+
 ]
+

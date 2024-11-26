@@ -1,7 +1,9 @@
 import simfin as sf
 import csv
 from django.shortcuts import render, redirect
+import io
 from django.contrib.auth import login
+import plotly.graph_objs as go
 from .forms import CustomUserCreationForm
 from django.contrib import messages
 from django.views.decorators.http import require_POST
@@ -181,11 +183,26 @@ def filter(request):
     # Filter stocks by market cap if requested
     market_cap_min = request.GET.get('market_cap_min')
     market_cap_max = request.GET.get('market_cap_max')
+    pe_ratio_min = request.GET.get('pe_ratio_min')
+    pe_ratio_max = request.GET.get('pe_ratio_max')
+    roe_min = request.GET.get('roe_min')
+    roe_max = request.GET.get('roe_max')
+    debt_to_equity_max = request.GET.get('debt_to_equity_max')
 
     if market_cap_min:
         stocks = stocks.filter(market_cap__gte=market_cap_min)
     if market_cap_max:
         stocks = stocks.filter(market_cap__lte=market_cap_max)
+    if pe_ratio_min:
+        stocks = stocks.filter(pe_ratio__gte=pe_ratio_min)
+    if pe_ratio_max:
+        stocks = stocks.filter(pe_ratio__lte=pe_ratio_max)
+    if roe_min:
+        stocks = stocks.filter(roe__gte=roe_min)
+    if roe_max:
+        stocks = stocks.filter(roe__lte=roe_max)
+    if debt_to_equity_max:
+        stocks = stocks.filter(debt_to_equity__lte=debt_to_equity_max)
 
     # Calculate average return
     average_return = None
@@ -286,7 +303,11 @@ def calculate_ratios():
     print("Finished calculating financial ratios.")
 
 def main_page(request):
-    return render(request, 'main_page.html')
+    shared_portfolios = Portfolio.objects.filter(is_shared=True)
+    context = {
+        'shared_portfolios': shared_portfolios,
+    }
+    return render(request, 'main_page.html', context)
 
 def create_portfolio(request):
     if request.method == 'POST':
@@ -390,13 +411,93 @@ def add_all_filtered_to_portfolio(request):
 
     tickers = filtered_tickers.split(',')
     for ticker in tickers:
-        # Zkontrolujeme, zda akcie již není v portfoliu
-        if not PortfolioStock.objects.filter(portfolio=portfolio, ticker=ticker).exists():
-            PortfolioStock.objects.create(portfolio=portfolio, ticker=ticker)
+        clean_ticker = ticker.split(' - ')[0].strip()  # Odebrání názvu společnosti
+        if not Stock.objects.filter(ticker=clean_ticker).exists():
+            print(f"Tento ticker neexistuje: {clean_ticker}")
+            continue
+
+        if not PortfolioStock.objects.filter(portfolio=portfolio, ticker=clean_ticker).exists():
+            PortfolioStock.objects.create(portfolio=portfolio, ticker=clean_ticker)
 
     messages.success(request, "All filtered stocks have been successfully added to your portfolio.")
-    return redirect('filter')
+    return redirect('view_portfolio', portfolio_id=portfolio_id)
 
+
+from django.db.models import Min, Max
+
+
+@login_required
+def view_portfolio(request, portfolio_id):
+    # Načtení portfolia bez omezení na vlastníka
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id)
+
+    # Načítání akcií v portfoliu
+    portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio)
+
+    # Načítání dat o cenách pro všechny akcie
+    prices_data = {}
+    stocks = []  # Seznam akcií v portfoliu
+    for stock_item in portfolio_stocks:
+        stock = get_object_or_404(Stock, ticker=stock_item.ticker)
+        stocks.append(stock)  # Uchováme akcii pro výpis v šabloně
+        share_prices = SharePrices.objects.filter(stock=stock).order_by('date')
+        if share_prices.exists():
+            prices_data[stock.ticker] = {price.date: price.close_price for price in share_prices}
+
+    # Pokud nejsou žádné ceny, ukončíme funkci
+    if not prices_data:
+        context = {
+            'portfolio': portfolio,
+            'stocks': stocks,
+            'avg_return': None,
+            'chart_data': None,
+        }
+        return render(request, 'portfolio_detail.html', context)
+
+    # Převod dat do DataFrame
+    df = pd.DataFrame(prices_data).sort_index()
+
+    # Vypočítáme průměrnou hodnotu každý den (ignorujeme NaN hodnoty)
+    df['ETF'] = df.mean(axis=1)
+
+    # Normalizace na první den (pomyslné ETF začíná na hodnotě 100)
+    df['ETF'] = (df['ETF'] / df['ETF'].iloc[0]) * 100
+
+    # Vytvoření dat pro interaktivní graf
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df.index, y=df['ETF'], mode='lines', name='Pomyslné ETF'))
+
+    # Převod grafu do JSON
+    chart_data = fig.to_json()
+
+    # Průměrná návratnost
+    avg_return = ((df['ETF'].iloc[-1] - df['ETF'].iloc[0]) / df['ETF'].iloc[0]) * 100
+
+    # Kontext pro šablonu
+    context = {
+        'portfolio': portfolio,
+        'stocks': stocks,  # Seznam akcií pro výpis
+        'avg_return': avg_return,
+        'chart_data': chart_data,  # Data pro interaktivní graf
+    }
+    return render(request, 'portfolio_detail.html', context)
+
+
+@login_required
+def user_portfolios(request):
+    # Získání všech portfolií přihlášeného uživatele
+    portfolios = Portfolio.objects.filter(user=request.user)
+    context = {
+        'portfolios': portfolios,
+    }
+    return render(request, 'user_portfolios.html', context)
+
+@login_required
+def toggle_share(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id, user=request.user)
+    portfolio.is_shared = not portfolio.is_shared
+    portfolio.save()
+    return redirect('view_portfolio', portfolio_id=portfolio_id)
 
 #to run this just use command prompt and:
 #python manage.py shell
@@ -404,7 +505,13 @@ def add_all_filtered_to_portfolio(request):
 #load_data_command()
 
 def load_data_command():
-    load_yfinance_data()
     load_simfin_data()
+    load_yfinance_data()
+    calculate_ratios()
+
+
+
+
+
 
 

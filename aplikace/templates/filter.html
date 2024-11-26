@@ -67,24 +67,25 @@
 
         {% if user.is_authenticated and user.portfolios.exists %}
         <form method="post" action="{% url 'add_all_filtered_to_portfolio' %}">
-            {% csrf_token %}
-            <div class="field">
-                <label class="label">Select Portfolio</label>
-                <div class="control">
-                    <div class="select">
-                        <select name="portfolio_id" required>
-                            {% for portfolio in user.portfolios.all %}
-                                <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
+    {% csrf_token %}
+    <div class="field">
+        <label class="label">Select Portfolio</label>
+        <div class="control">
+            <div class="select">
+                <select name="portfolio_id" required>
+                    {% for portfolio in user.portfolios.all %}
+                        <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="control" style="text-align: center; margin-top: 20px;">
-                <button class="button is-link" type="submit">Add All to Portfolio</button>
-            </div>
-            <input type="hidden" name="filtered_tickers" value="{{ stocks|join:',' }}">
-        </form>
+        </div>
+    </div>
+    <div class="control" style="text-align: center; margin-top: 20px;">
+        <button class="button is-link" type="submit">Add All to Portfolio</button>
+    </div>
+    <input type="hidden" name="filtered_tickers" value="{{ stocks|join:',' }}">
+</form>
+
         {% endif %}
 
         <div class="columns is-multiline">

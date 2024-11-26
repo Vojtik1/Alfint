@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Vaše Portfolia</h1>
+        <div class="columns is-multiline">
+            {% for portfolio in portfolios %}
+                <div class="column is-one-quarter">
+                    <div class="box" style="border-top: 4px solid #3273dc;">
+                        <h2 class="subtitle" style="color: #3273dc;">{{ portfolio.name }}</h2>
+                        <p><strong>Počet akcií:</strong> {{ portfolio.portfoliostock_set.count }}</p>
+                        <a href="/portfolio/{{ portfolio.id }}" class="button is-link is-light mt-3">Zobrazit Detail</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <a href="/create_portfolio/" class="button is-primary mt-5">Vytvořit nové portfolio</a>
+    </div>
+</section>
+{% endblock %}

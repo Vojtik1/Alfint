@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="title">Portfolio: {{ portfolio.name }}</h1>
+        <h2 class="subtitle">Detaily o akciích v portfoliu</h2>
+        <h2 class="subtitle">Průměrný výnos portfolia: {{ avg_return|floatformat:2 }}%</h2>
+        <table class="table is-fullwidth">
+            <thead>
+                <tr>
+                    <th>Název akcie</th>
+                    <th>Ticker</th>
+                    <th>Tržní kapitalizace</th>
+                    <th>P/E Ratio</th>
+                    <th>ROE (%)</th>
+                    <th>Debt to Equity Ratio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if stocks %}
+                    {% for stock in stocks %}
+                        <tr>
+                            <td>{{ stock.name }}</td>
+                            <td>{{ stock.ticker }}</td>
+                            <td>{{ stock.market_cap|floatformat:2|default:"N/A" }}</td>
+                            <td>{{ stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
+                            <td>{{ stock.roe|floatformat:2|default:"N/A" }}</td>
+                            <td>{{ stock.debt_to_equity|floatformat:2|default:"N/A" }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="has-text-centered">Žádné akcie v portfoliu.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <h2 class="subtitle">Graf vývoje ceny pomyslného ETF</h2>
+        {% if chart_data %}
+            <div id="interactive-chart"></div>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+            <script>
+                // Načtení dat z kontextu
+                const chartData = {{ chart_data|safe }};
+                Plotly.newPlot('interactive-chart', chartData.data, chartData.layout);
+            </script>
+        {% else %}
+            <p>Žádné dostupné údaje pro vytvoření grafu.</p>
+        {% endif %}
+
+        <a href="/user_portfolios/" class="button is-link mt-5">Zpět na přehled portfolií</a>
+        <form method="post" action="{% url 'toggle_share' portfolio.id %}">
+    {% csrf_token %}
+    {% if portfolio.is_shared %}
+        <button class="button is-danger" type="submit">Přestat sdílet</button>
+    {% else %}
+        <button class="button is-success" type="submit">Sdílet portfolio</button>
+    {% endif %}
+</form>
+
+    </div>
+</section>
+{% endblock %}
