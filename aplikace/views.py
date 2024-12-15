@@ -90,72 +90,82 @@ def load_simfin_data():
                 stock.name = ticker  # Placeholder name until updated from Yahoo Finance
                 stock.save()
 
-            # Update or create IncomeStatement records
-            if ticker in income_data.index.get_level_values('Ticker'):
-                income_records = income_data.loc[ticker]
-                for year in income_records.index.get_level_values('Fiscal Year'):
-                    IncomeStatement.objects.update_or_create(
-                        stock=stock,
-                        fiscal_year=year,
-                        defaults={
-                            'revenue': income_records.at[year, 'Revenue'] if 'Revenue' in income_records.columns else None,
-                            'gross_profit': income_records.at[year, 'Gross Profit'] if 'Gross Profit' in income_records.columns else None,
-                            'operating_income': income_records.at[year, 'Operating Income (Loss)'] if 'Operating Income (Loss)' in income_records.columns else None,
-                            'net_income': income_records.at[year, 'Net Income'] if 'Net Income' in income_records.columns else None,
-                            'ebitda': income_records.at[year, 'EBITDA'] if 'EBITDA' in income_records.columns else None,
-                        }
-                    )
+                # Update nebo create IncomeStatement
+                if ticker in income_data.index.get_level_values('Ticker'):
+                    income_records = income_data.loc[ticker]
+                    for year in income_records.index.get_level_values('Fiscal Year'):
+                        IncomeStatement.objects.update_or_create(
+                            stock=stock,
+                            fiscal_year=year,
+                            defaults={
+                                'revenue': income_records.at[
+                                    year, 'Revenue'] if 'Revenue' in income_records.columns else None,
+                                'gross_profit': income_records.at[
+                                    year, 'Gross Profit'] if 'Gross Profit' in income_records.columns else None,
+                                'operating_income': income_records.at[
+                                    year, 'Operating Income (Loss)'] if 'Operating Income (Loss)' in income_records.columns else None,
+                                'net_income': income_records.at[
+                                    year, 'Net Income'] if 'Net Income' in income_records.columns else None,
+                                'interest_expense': income_records.at[
+                                    year, 'Interest Expense, Net'] if 'Interest Expense, Net' in income_records.columns else None,
+                                'depreciation_amortization': income_records.at[
+                                    year, 'Depreciation & Amortization'] if 'Depreciation & Amortization' in income_records.columns else None,
+                            }
+                        )
 
-            # Update or create BalanceSheet records
-            if ticker in balance_data.index.get_level_values('Ticker'):
-                balance_records = balance_data.loc[ticker]
-                for year in balance_records.index.get_level_values('Fiscal Year'):
-                    BalanceSheet.objects.update_or_create(
-                        stock=stock,
-                        fiscal_year=year,
-                        defaults={
-                            'total_assets': balance_records.at[year, 'Total Assets'] if 'Total Assets' in balance_records.columns else None,
-                            'total_liabilities': balance_records.at[year, 'Total Liabilities'] if 'Total Liabilities' in balance_records.columns else None,
-                            'total_equity': balance_records.at[year, 'Total Equity'] if 'Total Equity' in balance_records.columns else None,
-                            'cash_and_equivalents': balance_records.at[year, 'Cash, Cash Equivalents & Short Term Investments'] if 'Cash, Cash Equivalents & Short Term Investments' in balance_records.columns else None,
-                            'short_term_debt': balance_records.at[year, 'Short Term Debt'] if 'Short Term Debt' in balance_records.columns else None,
-                            'long_term_debt': balance_records.at[year, 'Long Term Debt'] if 'Long Term Debt' in balance_records.columns else None,
-                            'total_current_assets': balance_records.at[year, 'Total Current Assets'] if 'Total Current Assets' in balance_records.columns else None,
-                            'total_current_liabilities': balance_records.at[year, 'Total Current Liabilities'] if 'Total Current Liabilities' in balance_records.columns else None,
-                            'inventories': balance_records.at[year, 'Inventories'] if 'Inventories' in balance_records.columns else None,
-                        }
-                    )
+                # Update nebo create BalanceSheet
+                if ticker in balance_data.index.get_level_values('Ticker'):
+                    balance_records = balance_data.loc[ticker]
+                    for year in balance_records.index.get_level_values('Fiscal Year'):
+                        BalanceSheet.objects.update_or_create(
+                            stock=stock,
+                            fiscal_year=year,
+                            defaults={
+                                'total_assets': balance_records.at[
+                                    year, 'Total Assets'] if 'Total Assets' in balance_records.columns else None,
+                                'total_current_assets': balance_records.at[
+                                    year, 'Total Current Assets'] if 'Total Current Assets' in balance_records.columns else None,
+                                'total_current_liabilities': balance_records.at[
+                                    year, 'Total Current Liabilities'] if 'Total Current Liabilities' in balance_records.columns else None,
+                                'inventories': balance_records.at[
+                                    year, 'Inventories'] if 'Inventories' in balance_records.columns else None,
+                                'total_liabilities': balance_records.at[
+                                    year, 'Total Liabilities'] if 'Total Liabilities' in balance_records.columns else None,
+                                'total_equity': balance_records.at[
+                                    year, 'Total Equity'] if 'Total Equity' in balance_records.columns else None,
+                                'short_term_debt': balance_records.at[
+                                    year, 'Short Term Debt'] if 'Short Term Debt' in balance_records.columns else None,
+                                'long_term_debt': balance_records.at[
+                                    year, 'Long Term Debt'] if 'Long Term Debt' in balance_records.columns else None,
+                            }
+                        )
 
-            # Update or create CashFlowStatement records
-            if ticker in cashflow_data.index.get_level_values('Ticker'):
-                cashflow_records = cashflow_data.loc[ticker]
-                for year in cashflow_records.index.get_level_values('Fiscal Year'):
-                    CashFlowStatement.objects.update_or_create(
-                        stock=stock,
-                        fiscal_year=year,
-                        defaults={
-                            'operating_cash_flow': cashflow_records.at[year, 'Net Cash from Operating Activities'] if 'Net Cash from Operating Activities' in cashflow_records.columns else None,
-                            'investing_cash_flow': cashflow_records.at[year, 'Net Cash from Investing Activities'] if 'Net Cash from Investing Activities' in cashflow_records.columns else None,
-                            'financing_cash_flow': cashflow_records.at[year, 'Net Cash from Financing Activities'] if 'Net Cash from Financing Activities' in cashflow_records.columns else None,
-                            'free_cash_flow': cashflow_records.at[year, 'Free Cash Flow'] if 'Free Cash Flow' in cashflow_records.columns else None,
-                        }
-                    )
-
-            # Update or create SharePrices records
-            if ticker in shareprices_data.index.get_level_values('Ticker'):
-                shareprice_records = shareprices_data.loc[ticker]
-                for date in shareprice_records.index.get_level_values('Date'):
-                    SharePrices.objects.update_or_create(
-                        stock=stock,
-                        date=date,
-                        defaults={
-                            'close_price': shareprice_records.at[date, 'Close'] if 'Close' in shareprice_records.columns else None,
-                            'open_price': shareprice_records.at[date, 'Open'] if 'Open' in shareprice_records.columns else None,
-                            'high_price': shareprice_records.at[date, 'High'] if 'High' in shareprice_records.columns else None,
-                            'low_price': shareprice_records.at[date, 'Low'] if 'Low' in shareprice_records.columns else None,
-                            'volume': shareprice_records.at[date, 'Volume'] if 'Volume' in shareprice_records.columns else None,
-                        }
-                    )
+                # Update nebo create CashFlowStatement
+                if ticker in cashflow_data.index.get_level_values('Ticker'):
+                    cashflow_records = cashflow_data.loc[ticker]
+                    for year in cashflow_records.index.get_level_values('Fiscal Year'):
+                        CashFlowStatement.objects.update_or_create(
+                            stock=stock,
+                            fiscal_year=year,
+                            defaults={
+                                'operating_cash_flow': cashflow_records.at[
+                                    year, 'Net Cash from Operating Activities'] if 'Net Cash from Operating Activities' in cashflow_records.columns else None,
+                                'investing_cash_flow': cashflow_records.at[
+                                    year, 'Net Cash from Investing Activities'] if 'Net Cash from Investing Activities' in cashflow_records.columns else None,
+                                'financing_cash_flow': cashflow_records.at[
+                                    year, 'Net Cash from Financing Activities'] if 'Net Cash from Financing Activities' in cashflow_records.columns else None,
+                                'free_cash_flow': (
+                                    cashflow_records.at[year, 'Net Cash from Operating Activities'] -
+                                    cashflow_records.at[year, 'Change in Fixed Assets & Intangibles']
+                                    if 'Net Cash from Operating Activities' in cashflow_records.columns and
+                                       'Change in Fixed Assets & Intangibles' in cashflow_records.columns else None
+                                ),
+                                'capital_expenditures': cashflow_records.at[
+                                    year, 'Change in Fixed Assets & Intangibles'] if 'Change in Fixed Assets & Intangibles' in cashflow_records.columns else None,
+                                'dividends_paid': cashflow_records.at[
+                                    year, 'Dividends Paid'] if 'Dividends Paid' in cashflow_records.columns else None,
+                            }
+                        )
         print("Finished loading SimFin data.")
     except IntegrityError as e:
         print(f"Error saving data: {e}")
@@ -278,35 +288,87 @@ def calculate_ratios():
     stocks = Stock.objects.all()
     for stock in stocks:
         try:
-            # Load related financial data
+            # Načtení finančních dat
             income_statement = IncomeStatement.objects.filter(stock=stock).order_by('-fiscal_year').first()
             balance_sheet = BalanceSheet.objects.filter(stock=stock).order_by('-fiscal_year').first()
-
+            cash_flow_statement = CashFlowStatement.objects.filter(stock=stock).order_by('-fiscal_year').first()
 
             if income_statement and balance_sheet:
                 # P/E Ratio
-                if stock.market_cap and income_statement.net_income:
+                if stock.market_cap and income_statement.net_income and income_statement.net_income != 0:
                     stock.pe_ratio = round(stock.market_cap / income_statement.net_income, 2)
 
                 # Return on Assets (ROA)
-                if income_statement.net_income and balance_sheet.total_assets:
+                if income_statement.net_income and balance_sheet.total_assets and balance_sheet.total_assets != 0:
                     stock.roa = round((income_statement.net_income / balance_sheet.total_assets) * 100, 2)
 
                 # Return on Equity (ROE)
-                if income_statement.net_income and balance_sheet.total_equity:
+                if income_statement.net_income and balance_sheet.total_equity and balance_sheet.total_equity != 0:
                     stock.roe = round((income_statement.net_income / balance_sheet.total_equity) * 100, 2)
 
                 # Debt to Equity Ratio
-                if balance_sheet.total_liabilities and balance_sheet.total_equity:
+                if balance_sheet.total_liabilities and balance_sheet.total_equity and balance_sheet.total_equity != 0:
                     stock.debt_to_equity = round(balance_sheet.total_liabilities / balance_sheet.total_equity, 2)
 
+                # Debt Ratio
+                if balance_sheet.total_liabilities and balance_sheet.total_assets and balance_sheet.total_assets != 0:
+                    stock.debt_ratio = round(balance_sheet.total_liabilities / balance_sheet.total_assets, 2)
 
-                # Save the calculated ratios
+                # Current Ratio
+                if balance_sheet.total_current_assets and balance_sheet.total_current_liabilities and balance_sheet.total_current_liabilities != 0:
+                    stock.current_ratio = round(balance_sheet.total_current_assets / balance_sheet.total_current_liabilities, 2)
+
+                # Quick Ratio
+                if balance_sheet.total_current_assets and balance_sheet.inventories is not None and balance_sheet.total_current_liabilities and balance_sheet.total_current_liabilities != 0:
+                    stock.quick_ratio = round((balance_sheet.total_current_assets - balance_sheet.inventories) / balance_sheet.total_current_liabilities, 2)
+
+                # EV/EBITDA
+                if stock.enterprise_value and income_statement.ebitda and income_statement.ebitda != 0:
+                    stock.ev_to_ebitda = round(stock.enterprise_value / income_statement.ebitda, 2)
+
+                # Net Profit Margin
+                if income_statement.net_income and income_statement.revenue and income_statement.revenue != 0:
+                    stock.net_profit_margin = round((income_statement.net_income / income_statement.revenue) * 100, 2)
+
+                    # Gross Profit Margin
+                    if income_statement.gross_profit and income_statement.revenue and income_statement.revenue != 0:
+                        stock.gross_profit_margin = round(
+                            (income_statement.gross_profit / income_statement.revenue) * 100, 2)
+
+                    # Operating Profit Margin
+                    if income_statement.operating_income and income_statement.revenue and income_statement.revenue != 0:
+                        stock.operating_profit_margin = round(
+                            (income_statement.operating_income / income_statement.revenue) * 100, 2)
+
+                    # Current Liabilities to Total Liabilities Ratio
+                    if balance_sheet.total_current_liabilities and balance_sheet.total_liabilities and balance_sheet.total_liabilities != 0:
+                        stock.current_liabilities_ratio = round(
+                            balance_sheet.total_current_liabilities / balance_sheet.total_liabilities, 2)
+
+                    # Free Cash Flow Yield
+                    if cash_flow_statement and cash_flow_statement.free_cash_flow and stock.market_cap and stock.market_cap != 0:
+                        stock.free_cash_flow_yield = round(
+                            (cash_flow_statement.free_cash_flow / stock.market_cap) * 100, 2)
+
+                    # Operating Cash Flow to Total Liabilities
+                    if cash_flow_statement and cash_flow_statement.operating_cash_flow and balance_sheet.total_liabilities and balance_sheet.total_liabilities != 0:
+                        stock.operating_cash_flow_to_liabilities = round(
+                            (cash_flow_statement.operating_cash_flow / balance_sheet.total_liabilities) * 100, 2)
+
+                    # Interest Coverage Ratio
+                    if income_statement.operating_income and income_statement.interest_expense and income_statement.interest_expense != 0:
+                        stock.interest_coverage_ratio = round(
+                            income_statement.operating_income / income_statement.interest_expense, 2)
+
+                # Uložení vypočítaných ukazatelů
                 stock.save()
                 print(f"Ratios calculated for {stock.ticker}")
+
         except Exception as e:
             print(f"Failed to calculate ratios for {stock.ticker}: {e}")
+
     print("Finished calculating financial ratios.")
+
 
 def main_page(request):
     shared_portfolios = Portfolio.objects.filter(is_shared=True)
@@ -524,8 +586,8 @@ def toggle_share(request, portfolio_id):
 #load_data_command()
 
 def load_data_command():
-    load_simfin_data()
-    load_yfinance_data()
+   # load_simfin_data()
+  #  load_yfinance_data()
     calculate_ratios()
 
 

@@ -15,7 +15,19 @@ class Stock(models.Model):
     industry = models.CharField(max_length=100, null=True, blank=True)
     roa = models.FloatField(null=True, blank=True)
     roe = models.FloatField(null=True, blank=True)
+    net_profit_margin = models.FloatField(null=True, blank=True)
     debt_to_equity = models.FloatField(null=True, blank=True)
+    debt_ratio = models.FloatField(null=True, blank=True)
+    current_ratio = models.FloatField(null=True, blank=True)
+    quick_ratio = models.FloatField(null=True, blank=True)
+    gross_profit_margin = models.FloatField(null=True, blank=True)
+    operating_profit_margin = models.FloatField(null=True, blank=True)
+    current_liabilities_ratio = models.FloatField(null=True, blank=True)
+    free_cash_flow_yield = models.FloatField(null=True, blank=True)
+    operating_cash_flow_to_liabilities = models.FloatField(null=True, blank=True)
+    interest_coverage_ratio = models.FloatField(null=True, blank=True)
+
+
 
     class Meta:
         verbose_name = "Stock"
@@ -30,13 +42,23 @@ class IncomeStatement(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     fiscal_year = models.IntegerField()
     revenue = models.FloatField(null=True, blank=True)
-    gross_profit = models.FloatField(null=True, blank=True)
-    operating_income = models.FloatField(null=True, blank=True)
-    net_income = models.FloatField(null=True, blank=True)
-    ebitda = models.FloatField(null=True, blank=True)
-    operating_expenses = models.FloatField(null=True, blank=True)
     cost_of_revenue = models.FloatField(null=True, blank=True)
+    gross_profit = models.FloatField(null=True, blank=True)
+    operating_expenses = models.FloatField(null=True, blank=True)
+    selling_general_admin = models.FloatField(null=True, blank=True)
+    research_development = models.FloatField(null=True, blank=True)
+    depreciation_amortization = models.FloatField(null=True, blank=True)
+    operating_income = models.FloatField(null=True, blank=True)
+    non_operating_income = models.FloatField(null=True, blank=True)
     interest_expense = models.FloatField(null=True, blank=True)
+    pretax_income_adj = models.FloatField(null=True, blank=True)
+    abnormal_gains = models.FloatField(null=True, blank=True)
+    pretax_income = models.FloatField(null=True, blank=True)
+    income_tax_expense = models.FloatField(null=True, blank=True)
+    income_continuing_ops = models.FloatField(null=True, blank=True)
+    net_extraordinary_gains = models.FloatField(null=True, blank=True)
+    net_income = models.FloatField(null=True, blank=True)
+    net_income_common = models.FloatField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Income Statement"
@@ -50,17 +72,26 @@ class IncomeStatement(models.Model):
 class BalanceSheet(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     fiscal_year = models.IntegerField()
-    total_assets = models.FloatField(null=True, blank=True)
-    total_liabilities = models.FloatField(null=True, blank=True)
-    total_equity = models.FloatField(null=True, blank=True)
     cash_and_equivalents = models.FloatField(null=True, blank=True)
-    short_term_debt = models.FloatField(null=True, blank=True)
-    long_term_debt = models.FloatField(null=True, blank=True)
     accounts_receivable = models.FloatField(null=True, blank=True)
     inventories = models.FloatField(null=True, blank=True)
-    retained_earnings = models.FloatField(null=True, blank=True)
     total_current_assets = models.FloatField(null=True, blank=True)
+    property_plant_equipment = models.FloatField(null=True, blank=True)
+    long_term_investments = models.FloatField(null=True, blank=True)
+    other_long_term_assets = models.FloatField(null=True, blank=True)
+    total_noncurrent_assets = models.FloatField(null=True, blank=True)
+    total_assets = models.FloatField(null=True, blank=True)
+    payables_accruals = models.FloatField(null=True, blank=True)
+    short_term_debt = models.FloatField(null=True, blank=True)
     total_current_liabilities = models.FloatField(null=True, blank=True)
+    long_term_debt = models.FloatField(null=True, blank=True)
+    total_noncurrent_liabilities = models.FloatField(null=True, blank=True)
+    total_liabilities = models.FloatField(null=True, blank=True)
+    share_capital = models.FloatField(null=True, blank=True)
+    treasury_stock = models.FloatField(null=True, blank=True)
+    retained_earnings = models.FloatField(null=True, blank=True)
+    total_equity = models.FloatField(null=True, blank=True)
+    total_liabilities_and_equity = models.FloatField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Balance Sheet"
@@ -71,14 +102,28 @@ class BalanceSheet(models.Model):
         return f"{self.stock.ticker} - {self.fiscal_year}"
 
 
+
 class CashFlowStatement(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     fiscal_year = models.IntegerField()
+    net_income_starting_line = models.FloatField(null=True, blank=True)
+    depreciation_amortization = models.FloatField(null=True, blank=True)
+    non_cash_items = models.FloatField(null=True, blank=True)
+    change_in_working_capital = models.FloatField(null=True, blank=True)
+    change_in_accounts_receivable = models.FloatField(null=True, blank=True)
+    change_in_inventories = models.FloatField(null=True, blank=True)
+    change_in_accounts_payable = models.FloatField(null=True, blank=True)
+    change_in_other = models.FloatField(null=True, blank=True)
     operating_cash_flow = models.FloatField(null=True, blank=True)
+    change_in_fixed_assets = models.FloatField(null=True, blank=True)
+    net_change_long_term_investments = models.FloatField(null=True, blank=True)
+    net_cash_acquisitions = models.FloatField(null=True, blank=True)
     investing_cash_flow = models.FloatField(null=True, blank=True)
+    dividends_paid = models.FloatField(null=True, blank=True)
+    cash_repayment_debt = models.FloatField(null=True, blank=True)
+    cash_repurchase_equity = models.FloatField(null=True, blank=True)
     financing_cash_flow = models.FloatField(null=True, blank=True)
-    free_cash_flow = models.FloatField(null=True, blank=True)
-    capital_expenditures = models.FloatField(null=True, blank=True)
+    net_change_in_cash = models.FloatField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Cash Flow Statement"
@@ -87,6 +132,7 @@ class CashFlowStatement(models.Model):
 
     def __str__(self):
         return f"{self.stock.ticker} - {self.fiscal_year}"
+
 
 
 class SharePrices(models.Model):
