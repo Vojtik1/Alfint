@@ -201,33 +201,48 @@ import json
 
 
 def filter(request):
+    filters = request.session.get('filters', [])  # Získání filtrů ze session
+    applied_filters = []  # Uchová seznam použitých filtrů
+
+    # Logika pro aplikování dynamických filtrů
     stocks = Stock.objects.all().order_by('-market_cap')
-    filters = request.GET.get('filters')  # Přijaté filtry jako JSON string
 
-    if filters:
-        try:
-            filters = json.loads(filters)  # Převod JSON string na Python seznam/dict
-            query = Q()
+    for f in filters:
+        field = f.get('field')
+        min_value = f.get('min')
+        max_value = f.get('max')
 
-            # Procházení jednotlivých filtrů
-            for filtr in filters:
-                name = filtr.get('name')  # Název ukazatele
-                min_value = filtr.get('min')
-                max_value = filtr.get('max')
+        if field and min_value:
+            kwargs = {f"{field}__gte": float(min_value)}
+            stocks = stocks.filter(**kwargs)
+        if field and max_value:
+            kwargs = {f"{field}__lte": float(max_value)}
+            stocks = stocks.filter(**kwargs)
 
-                # Dynamická tvorba podmínek pro filtrování
-                if name and hasattr(Stock, name):  # Ověření, že ukazatel existuje v modelu
-                    if min_value:
-                        query &= Q(**{f"{name}__gte": float(min_value)})
-                    if max_value:
-                        query &= Q(**{f"{name}__lte": float(max_value)})
+        applied_filters.append({
+            'field': field,
+            'min': min_value,
+            'max': max_value
+        })
 
-            # Použití vytvořeného query objektu na filtraci akcií
-            stocks = stocks.filter(query)
-        except json.JSONDecodeError:
-            print("Invalid filters format")
+    # Přidání nového filtru (při volání AJAXem)
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        new_filter = {
+            'field': request.POST.get('field'),
+            'min': request.POST.get('min'),
+            'max': request.POST.get('max')
+        }
+        filters.append(new_filter)
+        request.session['filters'] = filters
+        return JsonResponse({'success': True, 'filters': filters})
 
-    # Výpočet průměrného výnosu
+    # Odstranění všech filtrů
+    if request.GET.get('clear_filters'):
+        request.session['filters'] = []
+        filters = []
+        stocks = Stock.objects.all()
+
+    # Calculate average return
     average_return = None
     if stocks.exists():
         total_return = 0
@@ -246,10 +261,22 @@ def filter(request):
     context = {
         'stocks': stocks,
         'average_return': average_return,
+        'filters': applied_filters,
+        'ratios': [
+            {'name': 'P/E Ratio', 'field': 'pe_ratio'},
+            {'name': 'ROE (%)', 'field': 'roe'},
+            {'name': 'ROA (%)', 'field': 'roa'},
+            {'name': 'Debt to Equity', 'field': 'debt_to_equity'},
+            {'name': 'Current Ratio', 'field': 'current_ratio'},
+            {'name': 'Quick Ratio', 'field': 'quick_ratio'},
+            {'name': 'P/S Ratio', 'field': 'price_to_sales_ratio'},
+            {'name': 'P/B Ratio', 'field': 'price_to_book_ratio'},
+            {'name': 'Dividend Yield', 'field': 'dividend_yield'},
+            {'name': 'Altman Z-Score', 'field': 'altman_z_score'}
+        ]
     }
 
     return render(request, 'filter.html', context)
-
 
 def stock_detail(request, ticker):
     stock_data_yf = yf.Ticker(ticker)
