@@ -2,6 +2,7 @@ import simfin as sf
 import csv
 from django.shortcuts import render, redirect
 import io
+from django.core.paginator import Paginator
 from django.contrib.auth import login
 import plotly.graph_objs as go
 from .forms import CustomUserCreationForm
@@ -45,6 +46,11 @@ for dataset_name, variant in datasets:
     if not os.path.exists(dataset_path):
         print(f"Dataset {dataset_name} není nalezen. Stahování ze SimFin API...")
         sf.load(dataset=dataset_name, variant=variant, market='us', index=['Ticker', 'Fiscal Year'])
+
+def home(request):
+    if request.user.is_authenticated:
+        return redirect('main_page')  # Přesměrování na hlavní stránku pro přihlášené uživatele
+    return render(request, 'home.html')
 
 def create_price_chart(close_prices):
     dates = [price['date'] for price in close_prices]
@@ -436,13 +442,27 @@ def view_portfolio(request, portfolio_id):
 
     # Načítání dat o cenách pro všechny akcie
     prices_data = {}
-    stocks = []  # Seznam akcií v portfoliu
+    stocks = []  # Seznam akcií v portfoliu s dodatečnými údaji
     for stock_item in portfolio_stocks:
         stock = get_object_or_404(Stock, ticker=stock_item.ticker)
-        stocks.append(stock)  # Uchováme akcii pro výpis v šabloně
         share_prices = SharePrices.objects.filter(stock=stock).order_by('date')
+
+        # Výpočet návratnosti pro konkrétní akcii
+        stock_return = None
         if share_prices.exists():
+            first_price = share_prices.first().close_price
+            last_price = share_prices.last().close_price
+            if first_price and last_price and first_price != 0:
+                stock_return = ((last_price - first_price) / first_price) * 100
+
+            # Uložení dat o cenách pro analýzu
             prices_data[stock.ticker] = {price.date: price.close_price for price in share_prices}
+
+        # Přidáme akcii do seznamu s návratností
+        stocks.append({
+            'stock': stock,
+            'return': stock_return,  # Návratnost akcie
+        })
 
     # Pokud nejsou žádné ceny, ukončíme funkci
     if not prices_data:
@@ -470,18 +490,17 @@ def view_portfolio(request, portfolio_id):
     # Převod grafu do JSON
     chart_data = fig.to_json()
 
-    # Průměrná návratnost
+    # Průměrná návratnost portfolia
     avg_return = ((df['ETF'].iloc[-1] - df['ETF'].iloc[0]) / df['ETF'].iloc[0]) * 100
 
     # Kontext pro šablonu
     context = {
         'portfolio': portfolio,
-        'stocks': stocks,  # Seznam akcií pro výpis
+        'stocks': stocks,  # Seznam akcií s návratností
         'avg_return': avg_return,
         'chart_data': chart_data,  # Data pro interaktivní graf
     }
     return render(request, 'portfolio_detail.html', context)
-
 
 @login_required
 def user_portfolios(request):
