@@ -193,34 +193,41 @@ def load_yfinance_data():
                     print(f"Failed to fetch or save data for {stock.ticker} from Yahoo Finance: {e}")
             print("Finished loading Yahoo Finance data.")
 
+
+from django.shortcuts import render
+from django.db.models import Q
+from .models import Stock, SharePrices
+import json
+
+
 def filter(request):
     stocks = Stock.objects.all().order_by('-market_cap')
+    filters = request.GET.get('filters')  # Přijaté filtry jako JSON string
 
-    # Filter stocks by market cap if requested
-    market_cap_min = request.GET.get('market_cap_min')
-    market_cap_max = request.GET.get('market_cap_max')
-    pe_ratio_min = request.GET.get('pe_ratio_min')
-    pe_ratio_max = request.GET.get('pe_ratio_max')
-    roe_min = request.GET.get('roe_min')
-    roe_max = request.GET.get('roe_max')
-    debt_to_equity_max = request.GET.get('debt_to_equity_max')
+    if filters:
+        try:
+            filters = json.loads(filters)  # Převod JSON string na Python seznam/dict
+            query = Q()
 
-    if market_cap_min:
-        stocks = stocks.filter(market_cap__gte=market_cap_min)
-    if market_cap_max:
-        stocks = stocks.filter(market_cap__lte=market_cap_max)
-    if pe_ratio_min:
-        stocks = stocks.filter(pe_ratio__gte=pe_ratio_min)
-    if pe_ratio_max:
-        stocks = stocks.filter(pe_ratio__lte=pe_ratio_max)
-    if roe_min:
-        stocks = stocks.filter(roe__gte=roe_min)
-    if roe_max:
-        stocks = stocks.filter(roe__lte=roe_max)
-    if debt_to_equity_max:
-        stocks = stocks.filter(debt_to_equity__lte=debt_to_equity_max)
+            # Procházení jednotlivých filtrů
+            for filtr in filters:
+                name = filtr.get('name')  # Název ukazatele
+                min_value = filtr.get('min')
+                max_value = filtr.get('max')
 
-    # Calculate average return
+                # Dynamická tvorba podmínek pro filtrování
+                if name and hasattr(Stock, name):  # Ověření, že ukazatel existuje v modelu
+                    if min_value:
+                        query &= Q(**{f"{name}__gte": float(min_value)})
+                    if max_value:
+                        query &= Q(**{f"{name}__lte": float(max_value)})
+
+            # Použití vytvořeného query objektu na filtraci akcií
+            stocks = stocks.filter(query)
+        except json.JSONDecodeError:
+            print("Invalid filters format")
+
+    # Výpočet průměrného výnosu
     average_return = None
     if stocks.exists():
         total_return = 0
@@ -242,6 +249,7 @@ def filter(request):
     }
 
     return render(request, 'filter.html', context)
+
 
 def stock_detail(request, ticker):
     stock_data_yf = yf.Ticker(ticker)
