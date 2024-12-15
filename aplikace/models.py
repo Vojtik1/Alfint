@@ -26,7 +26,15 @@ class Stock(models.Model):
     free_cash_flow_yield = models.FloatField(null=True, blank=True)
     operating_cash_flow_to_liabilities = models.FloatField(null=True, blank=True)
     interest_coverage_ratio = models.FloatField(null=True, blank=True)
-
+    dividend_payout_ratio = models.FloatField(null=True, blank=True)
+    dividend_yield = models.FloatField(null=True, blank=True)
+    cash_flow_to_debt_ratio = models.FloatField(null=True, blank=True)
+    roic = models.FloatField(null=True, blank=True)
+    free_cash_flow_to_revenue_ratio = models.FloatField(null=True, blank=True)
+    price_to_sales_ratio = models.FloatField(null=True, blank=True)
+    price_to_book_ratio = models.FloatField(null=True, blank=True)
+    ev_to_revenue_ratio = models.FloatField(null=True, blank=True)
+    altman_z_score = models.FloatField(null=True, blank=True)
 
 
     class Meta:

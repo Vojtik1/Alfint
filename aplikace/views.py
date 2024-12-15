@@ -306,6 +306,10 @@ def calculate_ratios():
                 if income_statement.net_income and balance_sheet.total_equity and balance_sheet.total_equity != 0:
                     stock.roe = round((income_statement.net_income / balance_sheet.total_equity) * 100, 2)
 
+                # Net Profit Margin
+                if income_statement.net_income and income_statement.revenue and income_statement.revenue != 0:
+                    stock.net_profit_margin = round((income_statement.net_income / income_statement.revenue) * 100, 2)
+
                 # Debt to Equity Ratio
                 if balance_sheet.total_liabilities and balance_sheet.total_equity and balance_sheet.total_equity != 0:
                     stock.debt_to_equity = round(balance_sheet.total_liabilities / balance_sheet.total_equity, 2)
@@ -322,43 +326,77 @@ def calculate_ratios():
                 if balance_sheet.total_current_assets and balance_sheet.inventories is not None and balance_sheet.total_current_liabilities and balance_sheet.total_current_liabilities != 0:
                     stock.quick_ratio = round((balance_sheet.total_current_assets - balance_sheet.inventories) / balance_sheet.total_current_liabilities, 2)
 
-                # EV/EBITDA
-                if stock.enterprise_value and income_statement.ebitda and income_statement.ebitda != 0:
-                    stock.ev_to_ebitda = round(stock.enterprise_value / income_statement.ebitda, 2)
+                # Gross Profit Margin
+                if income_statement.gross_profit and income_statement.revenue and income_statement.revenue != 0:
+                    stock.gross_profit_margin = round((income_statement.gross_profit / income_statement.revenue) * 100, 2)
 
-                # Net Profit Margin
-                if income_statement.net_income and income_statement.revenue and income_statement.revenue != 0:
-                    stock.net_profit_margin = round((income_statement.net_income / income_statement.revenue) * 100, 2)
+                # Operating Profit Margin
+                if income_statement.operating_income and income_statement.revenue and income_statement.revenue != 0:
+                    stock.operating_profit_margin = round((income_statement.operating_income / income_statement.revenue) * 100, 2)
 
-                    # Gross Profit Margin
-                    if income_statement.gross_profit and income_statement.revenue and income_statement.revenue != 0:
-                        stock.gross_profit_margin = round(
-                            (income_statement.gross_profit / income_statement.revenue) * 100, 2)
+                # Current Liabilities to Total Liabilities Ratio
+                if balance_sheet.total_current_liabilities and balance_sheet.total_liabilities and balance_sheet.total_liabilities != 0:
+                    stock.current_liabilities_ratio = round(balance_sheet.total_current_liabilities / balance_sheet.total_liabilities, 2)
 
-                    # Operating Profit Margin
-                    if income_statement.operating_income and income_statement.revenue and income_statement.revenue != 0:
-                        stock.operating_profit_margin = round(
-                            (income_statement.operating_income / income_statement.revenue) * 100, 2)
+                # Free Cash Flow Yield
+                if cash_flow_statement and cash_flow_statement.free_cash_flow and stock.market_cap and stock.market_cap != 0:
+                    stock.free_cash_flow_yield = round((cash_flow_statement.free_cash_flow / stock.market_cap) * 100, 2)
 
-                    # Current Liabilities to Total Liabilities Ratio
-                    if balance_sheet.total_current_liabilities and balance_sheet.total_liabilities and balance_sheet.total_liabilities != 0:
-                        stock.current_liabilities_ratio = round(
-                            balance_sheet.total_current_liabilities / balance_sheet.total_liabilities, 2)
+                # Operating Cash Flow to Total Liabilities
+                if cash_flow_statement and cash_flow_statement.operating_cash_flow and balance_sheet.total_liabilities and balance_sheet.total_liabilities != 0:
+                    stock.operating_cash_flow_to_liabilities = round((cash_flow_statement.operating_cash_flow / balance_sheet.total_liabilities) * 100, 2)
 
-                    # Free Cash Flow Yield
-                    if cash_flow_statement and cash_flow_statement.free_cash_flow and stock.market_cap and stock.market_cap != 0:
-                        stock.free_cash_flow_yield = round(
-                            (cash_flow_statement.free_cash_flow / stock.market_cap) * 100, 2)
+                # Interest Coverage Ratio
+                if income_statement.operating_income and income_statement.interest_expense and income_statement.interest_expense != 0:
+                    stock.interest_coverage_ratio = round(income_statement.operating_income / income_statement.interest_expense, 2)
 
-                    # Operating Cash Flow to Total Liabilities
-                    if cash_flow_statement and cash_flow_statement.operating_cash_flow and balance_sheet.total_liabilities and balance_sheet.total_liabilities != 0:
-                        stock.operating_cash_flow_to_liabilities = round(
-                            (cash_flow_statement.operating_cash_flow / balance_sheet.total_liabilities) * 100, 2)
+                # Dividend Payout Ratio
+                if income_statement.net_income and cash_flow_statement and cash_flow_statement.dividends_paid and income_statement.net_income != 0:
+                    stock.dividend_payout_ratio = round((cash_flow_statement.dividends_paid / income_statement.net_income) * 100, 2)
 
-                    # Interest Coverage Ratio
-                    if income_statement.operating_income and income_statement.interest_expense and income_statement.interest_expense != 0:
-                        stock.interest_coverage_ratio = round(
-                            income_statement.operating_income / income_statement.interest_expense, 2)
+                # Dividend Yield
+                if cash_flow_statement and cash_flow_statement.dividends_paid and stock.market_cap and stock.market_cap != 0:
+                    stock.dividend_yield = round((cash_flow_statement.dividends_paid / stock.market_cap) * 100, 2)
+
+                # Cash Flow to Debt Ratio
+                if cash_flow_statement and cash_flow_statement.operating_cash_flow and balance_sheet.total_liabilities and balance_sheet.total_liabilities != 0:
+                    stock.cash_flow_to_debt_ratio = round((cash_flow_statement.operating_cash_flow / balance_sheet.total_liabilities) * 100, 2)
+
+                # ROIC
+                if income_statement.net_income and balance_sheet.total_equity and balance_sheet.total_liabilities:
+                    invested_capital = balance_sheet.total_equity + balance_sheet.total_liabilities
+                    if invested_capital != 0:
+                        stock.roic = round((income_statement.net_income / invested_capital) * 100, 2)
+
+                # Free Cash Flow to Revenue Ratio
+                if cash_flow_statement and cash_flow_statement.free_cash_flow and income_statement.revenue and income_statement.revenue != 0:
+                    stock.free_cash_flow_to_revenue_ratio = round((cash_flow_statement.free_cash_flow / income_statement.revenue) * 100, 2)
+
+                # Price-to-Sales Ratio (P/S)
+                if stock.market_cap and income_statement.revenue and income_statement.revenue != 0:
+                    stock.price_to_sales_ratio = round(stock.market_cap / income_statement.revenue, 2)
+
+                # Price-to-Book Ratio (P/B)
+                if stock.market_cap and balance_sheet.total_equity and balance_sheet.total_equity != 0:
+                    stock.price_to_book_ratio = round(stock.market_cap / balance_sheet.total_equity, 2)
+
+                # EV/Revenue Ratio
+                if stock.enterprise_value and income_statement.revenue and income_statement.revenue != 0:
+                    stock.ev_to_revenue_ratio = round(stock.enterprise_value / income_statement.revenue, 2)
+
+                # Altman Z-Score
+                if (balance_sheet.total_current_assets and balance_sheet.total_current_liabilities and
+                        balance_sheet.total_assets and income_statement.revenue and
+                        balance_sheet.total_liabilities and balance_sheet.retained_earnings):
+                    working_capital = balance_sheet.total_current_assets - balance_sheet.total_current_liabilities
+                    z_score = (
+                        1.2 * (working_capital / balance_sheet.total_assets) +
+                        1.4 * (balance_sheet.retained_earnings / balance_sheet.total_assets) +
+                        3.3 * (income_statement.operating_income / balance_sheet.total_assets) +
+                        0.6 * (stock.market_cap / balance_sheet.total_liabilities) +
+                        1.0 * (income_statement.revenue / balance_sheet.total_assets)
+                    )
+                    stock.altman_z_score = round(z_score, 2)
 
                 # Uložení vypočítaných ukazatelů
                 stock.save()
@@ -368,6 +406,7 @@ def calculate_ratios():
             print(f"Failed to calculate ratios for {stock.ticker}: {e}")
 
     print("Finished calculating financial ratios.")
+
 
 
 def main_page(request):
