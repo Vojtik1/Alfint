@@ -13,73 +13,47 @@
             <div id="selected-filters">
                 {% for filter in filters %}
                     <!-- "Hotový" filtr -->
-                    <div
-                        class="box mb-3 filter-box"
-                        style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;"
-                        onclick="toggleEditMode('{{ filter.field }}')"
-                    >
+                    <div class="box mb-3 filter-box" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleEditMode('{{ filter.field }}')">
                         <span style="font-weight: bold;">{{ filter.field|title }}</span>
-                       <span>
-    {% if filter.operator == 'gte' %}
-        Bigger Than
-    {% else %}
-        Smaller Than
-    {% endif %}
-    : {{ filter.value }}
-</span>
-
+                        <span>
+                            {% if filter.operator == 'gte' %}
+                                Bigger Than
+                            {% elif filter.operator == 'lte' %}
+                                Smaller Than
+                            {% else %}
+                                Equals
+                            {% endif %}
+                            : {{ filter.value }}
+                        </span>
                     </div>
 
                     <!-- Editační režim pro filtr -->
-                    <div
-                        class="box mb-3 filter-edit-mode"
-                        id="edit-{{ filter.field }}"
-                        style="display: none; align-items: center;"
-                    >
+                    <div class="box mb-3 filter-edit-mode" id="edit-{{ filter.field }}" style="display: none; align-items: center;">
                         <span style="font-weight: bold; margin-right: 10px;">{{ filter.field|title }}</span>
 
                         <!-- Dropdown pro operátor -->
                         <div class="select mr-3">
-                            <select
-                                style="border-radius: 5px; height: 35px;"
-                                onchange="updateFilter('{{ filter.field }}', 'operator', this.value)"
-                            >
+                            <select style="border-radius: 5px; height: 35px;" onchange="updateFilter('{{ filter.field }}', 'operator', this.value)">
                                 <option value="gte" {% if filter.operator == 'gte' %}selected{% endif %}>Bigger Than</option>
                                 <option value="lte" {% if filter.operator == 'lte' %}selected{% endif %}>Smaller Than</option>
+                                <option value="eq" {% if filter.operator == 'eq' %}selected{% endif %}>Equals</option>
                             </select>
                         </div>
 
                         <!-- Input pro hodnotu -->
-                        <input
-                            class="input mr-3"
-                            type="number"
-                            step="0.01"
-                            value="{{ filter.value }}"
-                            style="width: 100px; border-radius: 5px; height: 35px;"
-                            onchange="updateFilter('{{ filter.field }}', 'value', this.value)"
-                        />
+                        <input class="input mr-3" type="text" value="{{ filter.value }}" style="width: 100px; border-radius: 5px; height: 35px;" onchange="updateFilter('{{ filter.field }}', 'value', this.value)" />
 
                         <!-- Tlačítko Confirm -->
-                        <button
-                            class="button is-success is-small mr-2"
-                            onclick="confirmFilters()"
-                        >
-                            Confirm
-                        </button>
+                        <button class="button is-success is-small mr-2" onclick="confirmFilters()">Confirm</button>
 
                         <!-- Smazání filtru -->
-                        <button
-                            class="delete ml-2"
-                            onclick="removeFilter('{{ filter.field }}')"
-                        ></button>
+                        <button class="delete ml-2" onclick="removeFilter('{{ filter.field }}')"></button>
                     </div>
                 {% empty %}
                     <p>No filters applied yet.</p>
                 {% endfor %}
             </div>
-
             <a href="?clear_filters=true" class="button is-danger is-small mt-2">Clear Filters</a>
-
         </div>
 
         <!-- Tlačítko pro přidání nového filtru -->
@@ -90,50 +64,36 @@
 
         <!-- Výsledky filtrovaných akcií -->
         <h2 class="subtitle mt-5">Filtered Stocks</h2>
-        <div id="stocks">
-            {% for stock in stocks %}
-                <div class="box mb-2">
-                    <a href="/stock/{{ stock.ticker }}" style="text-decoration: none; color: inherit;">
-                        <h3 class="subtitle">{{ stock.name }}</h3>
-                        <p>P/E Ratio: {{ stock.pe_ratio|floatformat:2|default:"N/A" }}</p>
-                        <p>Market Cap: {{ stock.market_cap|floatformat:2|default:"N/A" }}</p>
-                    </a>
-                </div>
-            {% empty %}
-                <p>No stocks match the selected filters.</p>
-            {% endfor %}
-        </div>
-    </div>
-</section>
+        <div id="stocks" class="box" style="overflow-x: auto;">
+            <table class="table is-fullwidth is-striped is-hoverable">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Ticker</th>
+                        <th>Industry</th>
+                        <th>Sector</th>
+                        <th>P/E Ratio</th>
+                        <th>Market Cap</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in stocks %}
+                        <tr>
+                            <td style="font-weight: bold;">{{ stock.name }}</td>
+                            <td style="font-size: 0.9em; color: #6a6a6a;">{{ stock.ticker }}</td>
+                            <td><span style="background-color: #e8f5e9; color: #388e3c; border-radius: 5px; padding: 2px 5px;">{{ stock.industry|default:"N/A" }}</span></td>
+                            <td><span style="background-color: #f1f8e9; color: #6a1b9a; border-radius: 5px; padding: 2px 5px;">{{ stock.sector|default:"N/A" }}</span></td>
+                            <td>{{ stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
+                            <td>{{ stock.market_cap|floatformat:2|default:"N/A" }}</td>
+                            <td><a href="/stock/{{ stock.ticker }}" class="button is-link is-small">Details</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="has-text-centered">No stocks match the selected filters.</td>
+                        </tr>
+                    {% endfor %}
 
-<!-- Modální okno pro přidání filtru -->
-<div class="modal" id="filterModal">
-    <div class="modal-background" onclick="closeModal()"></div>
-    <div class="modal-card">
-        <header class="modal-card-head">
-            <p class="modal-card-title">Add New Filter</p>
-            <button class="delete" aria-label="close" onclick="closeModal()"></button>
-        </header>
-        <section class="modal-card-body">
-            <div class="field">
-                <label class="label">Select Ratio</label>
-                <div class="control">
-                    <div class="select is-fullwidth">
-                        <select id="filter-field">
-                            {% for ratio in ratios %}
-                                <option value="{{ ratio.field }}">{{ ratio.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <footer class="modal-card-foot">
-            <button class="button is-success" onclick="addFilter()">Add Filter</button>
-            <button class="button" onclick="closeModal()">Cancel</button>
-        </footer>
-    </div>
-</div>
 
 <script>
     function openModal() {
@@ -146,11 +106,33 @@
 
     function addFilter() {
         const field = document.getElementById('filter-field').value;
+        let value = null;
+
+        if (field === 'sector' || field === 'industry') {
+            value = document.getElementById('filter-value').value;
+        }
+
         fetch('', {
             method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': '{{ csrf_token }}' },
-            body: new URLSearchParams({ field })
-        }).then(() => location.reload());
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({ field, value })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert("Failed to add filter. Please try again.");
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function removeFilter(field) {
+        fetch(`?remove_filter=${field}`, { method: 'GET' }).then(() => location.reload());
     }
 
     function updateFilter(field, key, value) {
@@ -165,17 +147,69 @@
         location.reload();
     }
 
-    function removeFilter(field) {
-        fetch(`?remove_filter=${encodeURIComponent(field)}`, { method: 'GET' })
-        .then(() => location.reload());
-    }
+    function handleFieldSelection() {
+        const field = document.getElementById('filter-field').value;
+        const dropdownValues = document.getElementById('dropdown-values');
+        const filterValue = document.getElementById('filter-value');
 
-    function toggleEditMode(field) {
-        document.querySelectorAll('.filter-box').forEach(box => box.style.display = 'flex');
-        document.querySelectorAll('.filter-edit-mode').forEach(edit => edit.style.display = 'none');
-
-        document.getElementById(`edit-${field}`).style.display = 'flex';
-        document.querySelector(`[data-field="${field}"]`).style.display = 'none';
+        if (field === 'sector' || field === 'industry') {
+            dropdownValues.style.display = 'block';
+            filterValue.innerHTML = '';
+            const values = field === 'sector' ? sectors : industries;
+            values.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                filterValue.appendChild(option);
+            });
+        } else {
+            dropdownValues.style.display = 'none';
+        }
     }
 </script>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Modální okno pro přidání filtru -->
+<div class="modal" id="filterModal">
+    <div class="modal-background" onclick="closeModal()"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Add New Filter</p>
+            <button class="delete" aria-label="close" onclick="closeModal()"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="field">
+                <label class="label">Select Metric</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select id="filter-field" onchange="handleFieldSelection()">
+                            {% for ratio in ratios %}
+                                <option value="{{ ratio.field }}">{{ ratio.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="field" id="dropdown-values" style="display: none;">
+                <label class="label">Select Value</label>
+                <div class="control">
+                    <div class="select is-fullwidth">
+                        <select id="filter-value"></select>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <footer class="modal-card-foot">
+            <button class="button is-success" onclick="addFilter()">Add Filter</button>
+            <button class="button" onclick="closeModal()">Cancel</button>
+        </footer>
+    </div>
+</div>
+
+
 {% endblock %}

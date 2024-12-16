@@ -6,7 +6,7 @@ class Stock(models.Model):
     ticker = models.CharField(max_length=10)
     name = models.CharField(max_length=100)
     last_price = models.FloatField(null=True, blank=True)
-    market_cap = models.FloatField(null=True, blank=True)
+    market_cap = models.IntegerField(null=True, blank=True)
     pe_ratio = models.FloatField(null=True, blank=True)
     ebitda = models.FloatField(null=True, blank=True)
     beta = models.FloatField(null=True, blank=True)

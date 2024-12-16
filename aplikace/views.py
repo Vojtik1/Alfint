@@ -199,18 +199,24 @@ def load_yfinance_data():
 
 def filter(request):
     filters = request.session.get('filters', [])
+    unique_sectors = list(Stock.objects.exclude(sector__isnull=True).values_list('sector', flat=True).distinct())
+    unique_industries = list(Stock.objects.exclude(industry__isnull=True).values_list('industry', flat=True).distinct())
     applied_filters = []
 
     ratios = [
-        {'name': 'P/E Ratio', 'field': 'pe_ratio'},
-        {'name': 'ROE (%)', 'field': 'roe'},
+        {'name': 'Sector', 'field': 'sector'},
+        {'name': 'Industry', 'field': 'industry'},
         {'name': 'ROA (%)', 'field': 'roa'},
+        {'name': 'ROE (%)', 'field': 'roe'},
+        {'name': 'Net Profit Margin (%)', 'field': 'net_profit_margin'},
         {'name': 'Debt to Equity', 'field': 'debt_to_equity'},
+        {'name': 'Market Cap', 'field': 'market_cap'},
+        {'name': 'P/E Ratio', 'field': 'pe_ratio'},
+        {'name': 'EBITDA', 'field': 'ebitda'},
     ]
 
     stocks = Stock.objects.all().order_by('-market_cap')
 
-    # Aplikace filtrů
     for f in filters:
         field = f.get('field')
         operator = f.get('operator', 'gte')
@@ -218,61 +224,46 @@ def filter(request):
 
         if field and value:
             try:
-                kwargs = {f"{field}__{operator}": float(value)}
+                if field in ['sector', 'industry']:
+                    kwargs = {f"{field}__icontains": value}
+                else:
+                    kwargs = {f"{field}__{operator}": float(value)}
                 stocks = stocks.filter(**kwargs)
             except (ValueError, TypeError):
                 continue
 
         applied_filters.append(f)
 
-    if request.method == "POST":
-        if request.headers.get('Content-Type') == 'application/json':
-            body = json.loads(request.body)
-            # Pokud jde o potvrzení filtrů
-            if body.get('confirm'):
-                # Znovu aplikujeme filtry
-                request.session.modified = True
-                return JsonResponse({'success': True})
-
-    # Přidání nového filtru
     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         field = request.POST.get('field')
+        value = request.POST.get('value', None)
+
         if field and field in [r['field'] for r in ratios]:
-            filters.append({'field': field, 'operator': 'gte', 'value': None})
+            if field in ['sector', 'industry'] and value and not any(f['field'] == field and f['value'] == value for f in filters):
+                filters.append({'field': field, 'operator': 'icontains', 'value': value})
+            elif value is not None:
+                try:
+                    value = float(value)
+                    filters.append({'field': field, 'operator': 'gte', 'value': value})
+                except ValueError:
+                    return JsonResponse({'success': False, 'error': 'Invalid value for numeric field'})
             request.session['filters'] = filters
-        return JsonResponse({'success': True})
+            return JsonResponse({'success': True})
 
-    # Aktualizace filtru
-    if request.method == "POST" and '/filter/update/' in request.path:
-        body = json.loads(request.body)
-        field = body.get('field')
-        key = body.get('key')
-        value = body.get('value')
+        return JsonResponse({'success': False, 'error': 'Invalid field or value'})
 
-        for f in filters:
-            if f['field'] == field:
-                f[key] = value
-        request.session['filters'] = filters
-        return JsonResponse({'success': True})
-
-    # Odebrání filtru
-    if request.GET.get('remove_filter'):
-        filters = [f for f in filters if f['field'] != request.GET.get('remove_filter')]
-        request.session['filters'] = filters
-        return JsonResponse({'success': True})
-
-    # Vyčištění všech filtrů
     if request.GET.get('clear_filters'):
         request.session['filters'] = []
-        return redirect(request.path)  # Přesměruje zpět na aktuální stránku
+        return redirect(request.path)
 
     context = {
         'stocks': stocks,
         'filters': applied_filters,
-        'ratios': ratios
+        'ratios': ratios,
+        'sectors': unique_sectors,
+        'industries': unique_industries
     }
     return render(request, 'filter.html', context)
-
 def stock_detail(request, ticker):
     stock_data_yf = yf.Ticker(ticker)
     yf_info = stock_data_yf.info
