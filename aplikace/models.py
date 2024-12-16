@@ -40,7 +40,7 @@ class Stock(models.Model):
     class Meta:
         verbose_name = "Stock"
         verbose_name_plural = "Stocks"
-        ordering = ['ticker']
+        ordering = ['-market_cap']
 
     def __str__(self):
         return f"{self.ticker} - {self.name}"

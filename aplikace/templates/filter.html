@@ -4,6 +4,7 @@
 {% block content %}
 <section class="section">
     <div class="container">
+        <!-- Sekce pro Filtry -->
         <h1 class="title has-text-centered" style="color: #6a0dad;">Filter Stocks</h1>
 
         <!-- Vybrané filtry -->
@@ -11,15 +12,74 @@
             <h2 class="subtitle">Selected Filters</h2>
             <div id="selected-filters">
                 {% for filter in filters %}
-                    <div class="tag is-info is-light mb-1" data-field="{{ filter.field }}">
-                        <strong>{{ filter.field|title }}</strong>: Min {{ filter.min }} - Max {{ filter.max }}
-                        <button class="delete is-small" onclick="removeFilter('{{ filter.field }}')"></button>
+                    <!-- "Hotový" filtr -->
+                    <div
+                        class="box mb-3 filter-box"
+                        style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;"
+                        onclick="toggleEditMode('{{ filter.field }}')"
+                    >
+                        <span style="font-weight: bold;">{{ filter.field|title }}</span>
+                       <span>
+    {% if filter.operator == 'gte' %}
+        Bigger Than
+    {% else %}
+        Smaller Than
+    {% endif %}
+    : {{ filter.value }}
+</span>
+
+                    </div>
+
+                    <!-- Editační režim pro filtr -->
+                    <div
+                        class="box mb-3 filter-edit-mode"
+                        id="edit-{{ filter.field }}"
+                        style="display: none; align-items: center;"
+                    >
+                        <span style="font-weight: bold; margin-right: 10px;">{{ filter.field|title }}</span>
+
+                        <!-- Dropdown pro operátor -->
+                        <div class="select mr-3">
+                            <select
+                                style="border-radius: 5px; height: 35px;"
+                                onchange="updateFilter('{{ filter.field }}', 'operator', this.value)"
+                            >
+                                <option value="gte" {% if filter.operator == 'gte' %}selected{% endif %}>Bigger Than</option>
+                                <option value="lte" {% if filter.operator == 'lte' %}selected{% endif %}>Smaller Than</option>
+                            </select>
+                        </div>
+
+                        <!-- Input pro hodnotu -->
+                        <input
+                            class="input mr-3"
+                            type="number"
+                            step="0.01"
+                            value="{{ filter.value }}"
+                            style="width: 100px; border-radius: 5px; height: 35px;"
+                            onchange="updateFilter('{{ filter.field }}', 'value', this.value)"
+                        />
+
+                        <!-- Tlačítko Confirm -->
+                        <button
+                            class="button is-success is-small mr-2"
+                            onclick="confirmFilters()"
+                        >
+                            Confirm
+                        </button>
+
+                        <!-- Smazání filtru -->
+                        <button
+                            class="delete ml-2"
+                            onclick="removeFilter('{{ filter.field }}')"
+                        ></button>
                     </div>
                 {% empty %}
                     <p>No filters applied yet.</p>
                 {% endfor %}
             </div>
+
             <a href="?clear_filters=true" class="button is-danger is-small mt-2">Clear Filters</a>
+
         </div>
 
         <!-- Tlačítko pro přidání nového filtru -->
@@ -28,52 +88,16 @@
             <button class="button is-link" onclick="openModal()">Add Filter</button>
         </div>
 
-
-
-        <!-- Přidání akcií do portfolia -->
-        {% if user.is_authenticated and user.portfolios.exists %}
-        <div class="box">
-            <form method="post" action="{% url 'add_all_filtered_to_portfolio' %}">
-                {% csrf_token %}
-                <div class="field">
-                    <label class="label">Select Portfolio</label>
-                    <div class="control">
-                        <div class="select">
-                            <select name="portfolio_id" required>
-                                {% for portfolio in user.portfolios.all %}
-                                    <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <input type="hidden" name="filtered_tickers" value="{{ stocks|join:',' }}">
-                <div class="control" style="text-align: center; margin-top: 20px;">
-                    <button class="button is-link" type="submit">Add All Filtered Stocks to Portfolio</button>
-                </div>
-            </form>
-        </div>
-        {% endif %}
-
-        <!-- Průměrná návratnost -->
-        {% if average_return %}
-        <div class="notification is-primary has-text-centered">
-            <p>Average Return of Filtered Stocks: <strong>{{ average_return|floatformat:2 }}%</strong></p>
-        </div>
-        {% endif %}
-
         <!-- Výsledky filtrovaných akcií -->
-        <div id="stocks" class="columns is-multiline">
+        <h2 class="subtitle mt-5">Filtered Stocks</h2>
+        <div id="stocks">
             {% for stock in stocks %}
-                <div class="column is-one-quarter">
-                    <div class="box" style="border-top: 4px solid #6a0dad;">
-                        <h2 class="subtitle" style="color: #6a0dad;">{{ stock.name }}</h2>
-                        <p><strong>P/E Ratio:</strong> {{ stock.pe_ratio|floatformat:2|default:"N/A" }}</p>
-                        <p><strong>ROE (%):</strong> {{ stock.roe|floatformat:2|default:"N/A" }}</p>
-                        <p><strong>Debt to Equity:</strong> {{ stock.debt_to_equity|floatformat:2|default:"N/A" }}</p>
-                        <p><strong>Market Cap:</strong> {{ stock.market_cap|floatformat:2|default:"N/A" }}</p>
-                        <a href="/stock/{{ stock.ticker }}" class="button is-link is-light mt-3">View Details</a>
-                    </div>
+                <div class="box mb-2">
+                    <a href="/stock/{{ stock.ticker }}" style="text-decoration: none; color: inherit;">
+                        <h3 class="subtitle">{{ stock.name }}</h3>
+                        <p>P/E Ratio: {{ stock.pe_ratio|floatformat:2|default:"N/A" }}</p>
+                        <p>Market Cap: {{ stock.market_cap|floatformat:2|default:"N/A" }}</p>
+                    </a>
                 </div>
             {% empty %}
                 <p>No stocks match the selected filters.</p>
@@ -103,18 +127,6 @@
                     </div>
                 </div>
             </div>
-            <div class="field">
-                <label class="label">Minimum Value</label>
-                <div class="control">
-                    <input class="input" type="number" step="0.01" id="filter-min" placeholder="Enter minimum value">
-                </div>
-            </div>
-            <div class="field">
-                <label class="label">Maximum Value</label>
-                <div class="control">
-                    <input class="input" type="number" step="0.01" id="filter-max" placeholder="Enter maximum value">
-                </div>
-            </div>
         </section>
         <footer class="modal-card-foot">
             <button class="button is-success" onclick="addFilter()">Add Filter</button>
@@ -123,44 +135,47 @@
     </div>
 </div>
 
-<!-- JavaScript -->
 <script>
-    // Otevření modálního okna
     function openModal() {
         document.getElementById('filterModal').classList.add('is-active');
     }
 
-    // Zavření modálního okna
     function closeModal() {
         document.getElementById('filterModal').classList.remove('is-active');
     }
 
-    // Přidání nového filtru pomocí AJAX
     function addFilter() {
         const field = document.getElementById('filter-field').value;
-        const min = document.getElementById('filter-min').value;
-        const max = document.getElementById('filter-max').value;
-
         fetch('', {
             method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: new URLSearchParams({ field, min, max })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            }
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': '{{ csrf_token }}' },
+            body: new URLSearchParams({ field })
+        }).then(() => location.reload());
+    }
+
+    function updateFilter(field, key, value) {
+        fetch('/filter/update/', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ field, key, value })
         });
     }
 
-    // Odstranění filtru
+    function confirmFilters() {
+        location.reload();
+    }
+
     function removeFilter(field) {
-        fetch(`?remove_filter=${field}`, { method: 'GET' })
-            .then(() => location.reload());
+        fetch(`?remove_filter=${encodeURIComponent(field)}`, { method: 'GET' })
+        .then(() => location.reload());
+    }
+
+    function toggleEditMode(field) {
+        document.querySelectorAll('.filter-box').forEach(box => box.style.display = 'flex');
+        document.querySelectorAll('.filter-edit-mode').forEach(edit => edit.style.display = 'none');
+
+        document.getElementById(`edit-${field}`).style.display = 'flex';
+        document.querySelector(`[data-field="${field}"]`).style.display = 'none';
     }
 </script>
 {% endblock %}

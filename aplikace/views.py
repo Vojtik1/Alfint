@@ -1,9 +1,12 @@
+import json
+
 import simfin as sf
 import csv
 from django.shortcuts import render, redirect
 import io
 from django.core.paginator import Paginator
 from django.contrib.auth import login
+from django.db.models import Subquery, OuterRef, FloatField
 import plotly.graph_objs as go
 from .forms import CustomUserCreationForm
 from django.contrib import messages
@@ -194,88 +197,80 @@ def load_yfinance_data():
             print("Finished loading Yahoo Finance data.")
 
 
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Stock, SharePrices
-import json
-
-
 def filter(request):
-    filters = request.session.get('filters', [])  # Získání filtrů ze session
-    applied_filters = []  # Uchová seznam použitých filtrů
+    filters = request.session.get('filters', [])
+    applied_filters = []
 
-    # Logika pro aplikování dynamických filtrů
+    ratios = [
+        {'name': 'P/E Ratio', 'field': 'pe_ratio'},
+        {'name': 'ROE (%)', 'field': 'roe'},
+        {'name': 'ROA (%)', 'field': 'roa'},
+        {'name': 'Debt to Equity', 'field': 'debt_to_equity'},
+    ]
+
     stocks = Stock.objects.all().order_by('-market_cap')
 
+    # Aplikace filtrů
     for f in filters:
         field = f.get('field')
-        min_value = f.get('min')
-        max_value = f.get('max')
+        operator = f.get('operator', 'gte')
+        value = f.get('value')
 
-        if field and min_value:
-            kwargs = {f"{field}__gte": float(min_value)}
-            stocks = stocks.filter(**kwargs)
-        if field and max_value:
-            kwargs = {f"{field}__lte": float(max_value)}
-            stocks = stocks.filter(**kwargs)
+        if field and value:
+            try:
+                kwargs = {f"{field}__{operator}": float(value)}
+                stocks = stocks.filter(**kwargs)
+            except (ValueError, TypeError):
+                continue
 
-        applied_filters.append({
-            'field': field,
-            'min': min_value,
-            'max': max_value
-        })
+        applied_filters.append(f)
 
-    # Přidání nového filtru (při volání AJAXem)
+    if request.method == "POST":
+        if request.headers.get('Content-Type') == 'application/json':
+            body = json.loads(request.body)
+            # Pokud jde o potvrzení filtrů
+            if body.get('confirm'):
+                # Znovu aplikujeme filtry
+                request.session.modified = True
+                return JsonResponse({'success': True})
+
+    # Přidání nového filtru
     if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        new_filter = {
-            'field': request.POST.get('field'),
-            'min': request.POST.get('min'),
-            'max': request.POST.get('max')
-        }
-        filters.append(new_filter)
-        request.session['filters'] = filters
-        return JsonResponse({'success': True, 'filters': filters})
+        field = request.POST.get('field')
+        if field and field in [r['field'] for r in ratios]:
+            filters.append({'field': field, 'operator': 'gte', 'value': None})
+            request.session['filters'] = filters
+        return JsonResponse({'success': True})
 
-    # Odstranění všech filtrů
+    # Aktualizace filtru
+    if request.method == "POST" and '/filter/update/' in request.path:
+        body = json.loads(request.body)
+        field = body.get('field')
+        key = body.get('key')
+        value = body.get('value')
+
+        for f in filters:
+            if f['field'] == field:
+                f[key] = value
+        request.session['filters'] = filters
+        return JsonResponse({'success': True})
+
+    # Odebrání filtru
+    if request.GET.get('remove_filter'):
+        filters = [f for f in filters if f['field'] != request.GET.get('remove_filter')]
+        request.session['filters'] = filters
+        return JsonResponse({'success': True})
+
+    # Vyčištění všech filtrů
     if request.GET.get('clear_filters'):
         request.session['filters'] = []
-        filters = []
-        stocks = Stock.objects.all()
-
-    # Calculate average return
-    average_return = None
-    if stocks.exists():
-        total_return = 0
-        count = 0
-        for stock in stocks:
-            share_prices = SharePrices.objects.filter(stock=stock).order_by('date')
-            if share_prices.count() > 1:
-                first_price = share_prices.first().close_price
-                last_price = share_prices.last().close_price
-                if first_price and last_price and first_price != 0:
-                    total_return += (last_price - first_price) / first_price
-                    count += 1
-        if count > 0:
-            average_return = (total_return / count) * 100
+        return redirect(request.path)  # Přesměruje zpět na aktuální stránku
 
     context = {
         'stocks': stocks,
-        'average_return': average_return,
         'filters': applied_filters,
-        'ratios': [
-            {'name': 'P/E Ratio', 'field': 'pe_ratio'},
-            {'name': 'ROE (%)', 'field': 'roe'},
-            {'name': 'ROA (%)', 'field': 'roa'},
-            {'name': 'Debt to Equity', 'field': 'debt_to_equity'},
-            {'name': 'Current Ratio', 'field': 'current_ratio'},
-            {'name': 'Quick Ratio', 'field': 'quick_ratio'},
-            {'name': 'P/S Ratio', 'field': 'price_to_sales_ratio'},
-            {'name': 'P/B Ratio', 'field': 'price_to_book_ratio'},
-            {'name': 'Dividend Yield', 'field': 'dividend_yield'},
-            {'name': 'Altman Z-Score', 'field': 'altman_z_score'}
-        ]
+        'ratios': ratios
     }
-
     return render(request, 'filter.html', context)
 
 def stock_detail(request, ticker):
