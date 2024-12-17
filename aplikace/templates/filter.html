@@ -4,177 +4,150 @@
 {% block content %}
 <section class="section">
     <div class="container">
-        <!-- Sekce pro Filtry -->
+        <!-- Filter Section -->
         <h1 class="title has-text-centered" style="color: #6a0dad;">Filter Stocks</h1>
 
-        <!-- Vybrané filtry -->
+        <!-- Active Filters -->
         <div class="box">
             <h2 class="subtitle">Selected Filters</h2>
             <div id="selected-filters">
                 {% for filter in filters %}
-                    <!-- "Hotový" filtr -->
-                    <div class="box mb-3 filter-box" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="toggleEditMode('{{ filter.field }}')">
+                    <div class="box mb-3 filter-box" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer;">
                         <span style="font-weight: bold;">{{ filter.field|title }}</span>
-                        <span>
-                            {% if filter.operator == 'gte' %}
-                                Bigger Than
-                            {% elif filter.operator == 'lte' %}
-                                Smaller Than
-                            {% else %}
-                                Equals
-                            {% endif %}
-                            : {{ filter.value }}
-                        </span>
-                    </div>
-
-                    <!-- Editační režim pro filtr -->
-                    <div class="box mb-3 filter-edit-mode" id="edit-{{ filter.field }}" style="display: none; align-items: center;">
-                        <span style="font-weight: bold; margin-right: 10px;">{{ filter.field|title }}</span>
-
-                        <!-- Dropdown pro operátor -->
-                        <div class="select mr-3">
-                            <select style="border-radius: 5px; height: 35px;" onchange="updateFilter('{{ filter.field }}', 'operator', this.value)">
-                                <option value="gte" {% if filter.operator == 'gte' %}selected{% endif %}>Bigger Than</option>
-                                <option value="lte" {% if filter.operator == 'lte' %}selected{% endif %}>Smaller Than</option>
-                                <option value="eq" {% if filter.operator == 'eq' %}selected{% endif %}>Equals</option>
-                            </select>
-                        </div>
-
-                        <!-- Input pro hodnotu -->
-                        <input class="input mr-3" type="text" value="{{ filter.value }}" style="width: 100px; border-radius: 5px; height: 35px;" onchange="updateFilter('{{ filter.field }}', 'value', this.value)" />
-
-                        <!-- Tlačítko Confirm -->
-                        <button class="button is-success is-small mr-2" onclick="confirmFilters()">Confirm</button>
-
-                        <!-- Smazání filtru -->
-                        <button class="delete ml-2" onclick="removeFilter('{{ filter.field }}')"></button>
+                        {% if filter.field == 'sector' %}
+                            <div class="select">
+                                <select onchange="updateFilter('{{ filter.field }}', this.value)">
+                                    <option value="">Select Sector</option>
+                                    {% for sector in sectors %}
+                                        <option value="{{ sector }}" {% if filter.value == sector %}selected{% endif %}>{{ sector }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% elif filter.field == 'industry' %}
+                            <div class="select">
+                                <select onchange="updateFilter('{{ filter.field }}', this.value)">
+                                    <option value="">Select Industry</option>
+                                    {% for industry in industries %}
+                                        <option value="{{ industry }}" {% if filter.value == industry %}selected{% endif %}>{{ industry }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% else %}
+                            <div style="display: flex; gap: 10px;">
+                                <div class="select">
+                                    <select onchange="updateOperator('{{ filter.field }}', this.value)">
+                                        <option value="gte" {% if filter.operator == 'gte' %}selected{% endif %}>Bigger Than</option>
+                                        <option value="lte" {% if filter.operator == 'lte' %}selected{% endif %}>Smaller Than</option>
+                                    </select>
+                                </div>
+                                <input class="input" type="text" placeholder="Enter value" value="{{ filter.value|default:'' }}" onchange="updateFilter('{{ filter.field }}', this.value)" />
+                            </div>
+                        {% endif %}
                     </div>
                 {% empty %}
                     <p>No filters applied yet.</p>
                 {% endfor %}
             </div>
             <a href="?clear_filters=true" class="button is-danger is-small mt-2">Clear Filters</a>
+            <a href="?clear_filters=true" class="button is-danger is-small mt-2" onclick="confirmFilter()">Confirm</a>
         </div>
 
-        <!-- Tlačítko pro přidání nového filtru -->
+
+        <!-- Add New Filter Section -->
         <div class="box">
             <h2 class="subtitle">Add New Filter</h2>
             <button class="button is-link" onclick="openModal()">Add Filter</button>
         </div>
 
-        <!-- Výsledky filtrovaných akcií -->
+        {% if user.is_authenticated and user.portfolios.exists %}
+    <form method="post" action="{% url 'add_all_filtered_to_portfolio' %}">
+        {% csrf_token %}
+        <div class="field">
+            <label class="label">Select Portfolio</label>
+            <div class="control">
+                <div class="select">
+                    <select name="portfolio_id" required>
+                        {% for portfolio in user.portfolios.all %}
+                            <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="control" style="text-align: center; margin-top: 20px;">
+            <button class="button is-link" type="submit">Add All to Portfolio</button>
+        </div>
+
+        <!-- Skryté pole s tickery -->
+        <input type="hidden" name="filtered_tickers" value="{{ all_tickers|join:',' }}">
+    </form>
+{% endif %}
+
+
+        <!-- Filtered Stocks Table -->
         <h2 class="subtitle mt-5">Filtered Stocks</h2>
         <div id="stocks" class="box" style="overflow-x: auto;">
-            <table class="table is-fullwidth is-striped is-hoverable">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Ticker</th>
-                        <th>Industry</th>
-                        <th>Sector</th>
-                        <th>P/E Ratio</th>
-                        <th>Market Cap</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for stock in stocks %}
-                        <tr>
-                            <td style="font-weight: bold;">{{ stock.name }}</td>
-                            <td style="font-size: 0.9em; color: #6a6a6a;">{{ stock.ticker }}</td>
-                            <td><span style="background-color: #e8f5e9; color: #388e3c; border-radius: 5px; padding: 2px 5px;">{{ stock.industry|default:"N/A" }}</span></td>
-                            <td><span style="background-color: #f1f8e9; color: #6a1b9a; border-radius: 5px; padding: 2px 5px;">{{ stock.sector|default:"N/A" }}</span></td>
-                            <td>{{ stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
-                            <td>{{ stock.market_cap|floatformat:2|default:"N/A" }}</td>
-                            <td><a href="/stock/{{ stock.ticker }}" class="button is-link is-small">Details</a></td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="7" class="has-text-centered">No stocks match the selected filters.</td>
-                        </tr>
-                    {% endfor %}
-
-
-<script>
-    function openModal() {
-        document.getElementById('filterModal').classList.add('is-active');
-    }
-
-    function closeModal() {
-        document.getElementById('filterModal').classList.remove('is-active');
-    }
-
-    function addFilter() {
-        const field = document.getElementById('filter-field').value;
-        let value = null;
-
-        if (field === 'sector' || field === 'industry') {
-            value = document.getElementById('filter-value').value;
-        }
-
-        fetch('', {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: new URLSearchParams({ field, value })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert("Failed to add filter. Please try again.");
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-
-    function removeFilter(field) {
-        fetch(`?remove_filter=${field}`, { method: 'GET' }).then(() => location.reload());
-    }
-
-    function updateFilter(field, key, value) {
-        fetch('/filter/update/', {
-            method: 'POST',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/json' },
-            body: JSON.stringify({ field, key, value })
-        });
-    }
-
-    function confirmFilters() {
-        location.reload();
-    }
-
-    function handleFieldSelection() {
-        const field = document.getElementById('filter-field').value;
-        const dropdownValues = document.getElementById('dropdown-values');
-        const filterValue = document.getElementById('filter-value');
-
-        if (field === 'sector' || field === 'industry') {
-            dropdownValues.style.display = 'block';
-            filterValue.innerHTML = '';
-            const values = field === 'sector' ? sectors : industries;
-            values.forEach(value => {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = value;
-                filterValue.appendChild(option);
-            });
-        } else {
-            dropdownValues.style.display = 'none';
-        }
-    }
-</script>
-
-                </tbody>
-            </table>
-        </div>
+    <table class="table is-fullwidth is-striped is-hoverable">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Ticker</th>
+                <th>Industry</th>
+                <th>Sector</th>
+                <th>P/E Ratio</th>
+                <th>Market Cap</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stock in stocks %}
+                <tr>
+                    <td>{{ stock.name }}</td>
+                    <td>{{ stock.ticker }}</td>
+                    <td>{{ stock.industry|default:"N/A" }}</td>
+                    <td>{{ stock.sector|default:"N/A" }}</td>
+                    <td>{{ stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
+                    <td>{{ stock.market_cap|floatformat:2|default:"N/A" }}</td>
+                    <td><a href="/stock/{{ stock.ticker }}" class="button is-link is-small">Details</a></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="has-text-centered">No stocks match the selected filters.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
     </div>
+    <!-- PAGINATION CONTROLS -->
+<nav class="pagination is-centered" role="navigation" aria-label="pagination">
+    <!-- Předchozí stránka -->
+    {% if stocks.has_previous %}
+        <a class="pagination-previous" href="?page={{ stocks.previous_page_number }}">Previous</a>
+    {% else %}
+        <a class="pagination-previous" disabled>Previous</a>
+    {% endif %}
+
+    <!-- Další stránka -->
+    {% if stocks.has_next %}
+        <a class="pagination-next" href="?page={{ stocks.next_page_number }}">Next</a>
+    {% else %}
+        <a class="pagination-next" disabled>Next</a>
+    {% endif %}
+
+    <!-- Seznam čísel stránek -->
+    <ul class="pagination-list">
+        {% for num in stocks.paginator.page_range %}
+            {% if num == stocks.number %}
+                <li><a class="pagination-link is-current" aria-label="Page {{ num }}" aria-current="page">{{ num }}</a></li>
+            {% elif num > stocks.number|add:'-3' and num < stocks.number|add:'3' %}
+                <li><a class="pagination-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</nav>
 </section>
 
-<!-- Modální okno pro přidání filtru -->
 <div class="modal" id="filterModal">
     <div class="modal-background" onclick="closeModal()"></div>
     <div class="modal-card">
@@ -187,19 +160,11 @@
                 <label class="label">Select Metric</label>
                 <div class="control">
                     <div class="select is-fullwidth">
-                        <select id="filter-field" onchange="handleFieldSelection()">
+                        <select id="filter-field">
                             {% for ratio in ratios %}
                                 <option value="{{ ratio.field }}">{{ ratio.name }}</option>
                             {% endfor %}
                         </select>
-                    </div>
-                </div>
-            </div>
-            <div class="field" id="dropdown-values" style="display: none;">
-                <label class="label">Select Value</label>
-                <div class="control">
-                    <div class="select is-fullwidth">
-                        <select id="filter-value"></select>
                     </div>
                 </div>
             </div>
@@ -211,5 +176,79 @@
     </div>
 </div>
 
+<script>
+    function openModal() {
+        document.getElementById('filterModal').classList.add('is-active');
+    }
+
+    function closeModal() {
+        document.getElementById('filterModal').classList.remove('is-active');
+    }
+
+    function addFilter() {
+        const field = document.getElementById('filter-field').value;
+
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({ field })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert("Failed to add filter. Please try again.");
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function updateFilter(field, value) {
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: new URLSearchParams({ field, value })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert("Failed to update filter value. Please try again.");
+            } else {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function updateOperator(field, operator) {
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: new URLSearchParams({ field, operator })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            alert("Failed to update operator. Please try again.");
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function confirmFilter() {
+        location.reload();
+    }
+
+</script>
 
 {% endblock %}

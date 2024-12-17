@@ -14,3 +14,4 @@ admin.site.register(PortfolioStock)
 class PortfolioAdmin(admin.ModelAdmin):
     list_display = ('name', 'user', 'is_shared')
     list_filter = ('is_shared',)
+
