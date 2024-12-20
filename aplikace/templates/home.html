@@ -3,125 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alfint - Home</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #8a2be2, #6a0dad);
-            color: #333;
-            overflow-x: hidden;
-            position: relative;
-        }
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-            opacity: 0.2;
-            z-index: -1;
-        }
-        header {
-            color: white;
-            text-align: center;
-            padding: 4rem 1rem;
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-        header h1 {
-            margin: 0;
-            font-size: 3.5rem;
-            font-weight: 700;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.2);
-        }
-        header p {
-            font-size: 1.4rem;
-            margin-top: 0.5rem;
-        }
-        main {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 2.5rem;
-            background: white;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-            border-radius: 16px;
-            transform: translateY(-60px);
-        }
-        section {
-            margin-bottom: 2.5rem;
-            text-align: center;
-        }
-        section h2 {
-            color: #6a0dad;
-            font-size: 2.4rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-        section p {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            color: #555;
-        }
-        #auth .btn {
-            display: inline-block;
-            margin: 0.5rem;
-            padding: 1rem 2.5rem;
-            color: white;
-            background: linear-gradient(135deg, #8a2be2, #6a0dad);
-            text-decoration: none;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border-radius: 10px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s, background-color 0.3s ease;
-        }
-        #auth .btn:hover {
-            background: linear-gradient(135deg, #7b26cd, #590a95);
-            transform: scale(1.1);
-        }
-        footer {
-            text-align: center;
-            padding: 2rem;
-            background: linear-gradient(135deg, #6a0dad, #8a2be2);
-            color: white;
-            font-size: 1rem;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-        }
-        footer p {
-            margin: 0;
-        }
-    </style>
+    <title>Alfint - Smart Stock Analytics & Backtesting</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ <style>
+    /* Global Styles */
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+    }
+
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+        background-color: #1e1e2f;
+        color: white;
+        padding: 30px 0;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 10;
+    }
+
+    header .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .header-links {
+        display: flex;
+        gap: 20px;
+    }
+
+    .header-links a {
+        color: white;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .header-links a:hover {
+        color: #8a2be2;
+    }
+
+    .cta-btn {
+        background-color: #6c5ce7; /* More neutral color */
+        color: white;
+        padding: 8px 20px; /* Smaller padding */
+        border-radius: 5px;
+        font-size: 1rem;
+        font-weight: 500; /* Reduced font weight */
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .cta-btn:hover {
+        background-color: #5a4ec7; /* Lighter hover effect */
+        transform: scale(1.02); /* Slight scale change on hover */
+    }
+
+    /* Main Content */
+    .main-content {
+        margin-top: 120px;
+        text-align: center;
+        padding: 60px 0;
+        background-color: #ffffff;
+    }
+
+    .main-content h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #1e1e2f;
+    }
+
+    .main-content p {
+        font-size: 1.2rem;
+        color: #555;
+        max-width: 800px;
+        margin: 20px auto;
+    }
+
+    /* Features Section */
+    .features-section {
+        background-color: #f8f8f8;
+        padding: 60px 0;
+    }
+
+    .features-section h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .feature-cards {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        margin-top: 40px;
+    }
+
+    .feature-card {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 30px;
+        width: 30%;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .feature-card p {
+        font-size: 1rem;
+        color: #555;
+    }
+
+    .cta-btn-lg {
+        font-size: 1.2rem;
+        margin-top: 40px;
+        padding: 12px 40px;
+        background-color: #8a2be2;
+        color: white;
+        border-radius: 5px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .cta-btn-lg:hover {
+        background-color: #7b26cd;
+        transform: scale(1.05);
+    }
+
+    /* Technologies Section */
+    .tech-section {
+        background-color: #fff;
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .tech-section h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e1e2f;
+        margin-bottom: 30px;
+    }
+
+    .tech-description {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow: hidden;
+        justify-content: center;
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .tech-list {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+        width: 500%;
+    }
+
+    .tech-item {
+        display: flex;
+        align-items: center;
+        width: 33.33%;  /* Each item takes up 1/3 of the container */
+        gap: 15px;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+
+    .tech-item .tech-icon {
+        font-size: 3rem;
+        color: #8a2be2;
+        transition: color 0.3s;
+    }
+
+    .tech-item .tech-text h4 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .tech-item .tech-text p {
+        font-size: 1rem;
+        color: #555;
+        margin: 0;
+    }
+
+    /* Animation for rotating through the technologies */
+    @keyframes rotateTech {
+        0% { transform: translateX(0); }
+        20% { transform: translateX(-33.33%); }  /* Move left by 1/3 */
+        40% { transform: translateX(-66.66%); }  /* Move left by 2/3 */
+        60% { transform: translateX(-100%); }  /* Move by full 1 slide */
+        80% { transform: translateX(-133.33%); }  /* Continue moving */
+        100% { transform: translateX(-166.66%); } /* Loop back */
+    }
+
+    .tech-list {
+        animation: rotateTech 15s infinite;
+    }
+
+    .tech-icon:hover {
+        color: #7b26cd;
+    }
+
+    /* Footer */
+    footer {
+        background-color: #1e1e2f;
+        color: white;
+        padding: 40px 0;
+        text-align: center;
+        margin-bottom: 0; /* Remove any margin below the footer */
+    }
+
+    footer p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    footer .container {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+
+    footer .container > div {
+        flex: 1;
+        min-width: 250px;
+    }
+
+    footer h4 {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+
+    footer ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    footer ul li {
+        margin-bottom: 10px;
+    }
+
+    footer ul li a {
+        color: white;
+        transition: color 0.3s;
+    }
+
+    footer ul li a:hover {
+        color: #8a2be2;
+    }
+</style>
+
 </head>
 <body>
+
+    <!-- Header Section -->
     <header>
-        <h1>Welcome to Alfint</h1>
-        <p>Your ultimate tool for smarter investments and stock analysis.</p>
+        <div class="container">
+            <h1>Alfint</h1>
+            <div class="header-links">
+                <a href="#features">Features</a>
+                <a href="#about">About</a>
+                <a href="#technologies">Technologies</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div>
+                <a href="/login" class="cta-btn">Login</a>
+                <a href="/signup" class="cta-btn" style="margin-left: 15px;">Sign Up</a>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <section id="about">
-            <h2>About the Project</h2>
-            <p>Alfint is a comprehensive platform designed to help users analyze and backtest stocks using both historical and real-time data.
-               Our tools provide financial metrics, historical charts, and intuitive methods for creating and testing portfolios.</p>
-            <p>Join us today to gain the edge in your investment journey!</p>
-        </section>
+    <!-- Main Content Section -->
+    <section class="main-content">
+        <div class="container">
+            <h2>Welcome to Alfint</h2>
+            <p>Your ultimate tool for smarter stock investments. Analyze and backtest stocks using historical and real-time data to optimize your portfolio strategies. Gain valuable insights with our in-depth metrics, historical charts, and easy-to-use tools.</p>
+            <a href="#about" class="cta-btn">Learn More</a>
+        </div>
+    </section>
 
-        <section id="auth">
-            <h2>Get Started</h2>
-            <div>
-                <a href="{% url 'login' %}" class="btn">Log In</a>
-                <a href="/signup/" class="btn">Sign Up</a>
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h3>Powerful Features</h3>
+            <div class="feature-cards">
+                <div class="feature-card">
+                    <h4>Backtesting Tools</h4>
+                    <p>Simulate and test your portfolio strategies using historical stock data to predict future performance.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Real-Time Data</h4>
+                    <p>Access up-to-date financial data, key metrics, and stock information to make informed decisions.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>Advanced Analytics</h4>
+                    <p>Gain deeper insights with customizable analytics, from stock comparisons to performance metrics.</p>
+                </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
+    <!-- About Section -->
+<section id="about" class="main-content">
+    <div class="container">
+        <h2>About Alfint</h2>
+        <p>Alfint is designed to help investors make smarter decisions by providing in-depth analytics and backtesting tools based on historical and real-time stock data. We use cutting-edge technologies like Python, Django, and various APIs to offer a seamless, powerful experience for investors looking to optimize their portfolios.</p>
+    </div>
+</section>
+
+
+    <!-- Technologies Section -->
+<section id="technologies" class="tech-section">
+    <div class="container">
+        <h3>Technologies We Use</h3>
+        <div class="tech-description">
+            <div class="tech-list">
+                <div class="tech-item">
+                    <i class="fa fa-python tech-icon" title="Python"></i>
+                    <div class="tech-text">
+                        <h4>Python</h4>
+                        <p>Python is the backbone of our platform. We use it for data processing, analysis, and backend services, enabling a smooth and efficient workflow.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <i class="fa fa-database tech-icon" title="Django"></i>
+                    <div class="tech-text">
+                        <h4>Django</h4>
+                        <p>Django powers the backend of Alfint, ensuring robust performance and scalability. It offers a secure framework for building the web application.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <i class="fa fa-cogs tech-icon" title="SimFin API"></i>
+                    <div class="tech-text">
+                        <h4>SimFin API</h4>
+                        <p>SimFin provides us with comprehensive financial data, including key stock fundamentals and historical data for in-depth analysis.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <i class="fa fa-bar-chart tech-icon" title="yFinance API"></i>
+                    <div class="tech-text">
+                        <h4>yFinance API</h4>
+                        <p>yFinance offers real-time stock data and financial information, allowing us to integrate live metrics and up-to-date market insights into our platform.</p>
+                    </div>
+                </div>
+                <div class="tech-item">
+                    <i class="fa fa-js tech-icon" title="JavaScript"></i>
+                    <div class="tech-text">
+                        <h4>JavaScript</h4>
+                        <p>JavaScript enhances the frontend of our application, enabling dynamic features such as interactive charts, graphs, and real-time data updates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer Section -->
     <footer>
-        <p>&copy; 2024 Alfint. All rights reserved.</p>
+        <div class="container">
+            <div>
+            <h4>About me</h4>
+            <p>
+                            I'm a passionate developer and investor with a strong focus on financial technologies and data analysis.
+                            I created Alfint to empower investors and analysts by providing easy-to-use tools for stock analysis and portfolio backtesting.
+                            My goal is to help users make smarter, data-driven investment decisions using powerful features and intuitive visualizations.
+                        </p>
+        </div>
+            <div>
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#technologies">Technologies</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Contact Us</h4>
+                <p>Email: support@alfint.com</p>
+                <p>Phone: +1 234 567 890</p>
+            </div>
+        </div>
     </footer>
 </body>
 </html>
+

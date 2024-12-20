@@ -62,6 +62,7 @@
         {% if user.is_authenticated and user.portfolios.exists %}
     <form method="post" action="{% url 'add_all_filtered_to_portfolio' %}">
         {% csrf_token %}
+
         <div class="field">
             <label class="label">Select Portfolio</label>
             <div class="control">
@@ -74,6 +75,7 @@
                 </div>
             </div>
         </div>
+
         <div class="control" style="text-align: center; margin-top: 20px;">
             <button class="button is-link" type="submit">Add All to Portfolio</button>
         </div>
@@ -82,6 +84,8 @@
         <input type="hidden" name="filtered_tickers" value="{{ all_tickers|join:',' }}">
     </form>
 {% endif %}
+
+
 
 
         <!-- Filtered Stocks Table -->
@@ -123,14 +127,14 @@
 <nav class="pagination is-centered" role="navigation" aria-label="pagination">
     <!-- Předchozí stránka -->
     {% if stocks.has_previous %}
-        <a class="pagination-previous" href="?page={{ stocks.previous_page_number }}">Previous</a>
+        <a class="pagination-previous" href="?page={{ stocks.previous_page_number }}{% for f in filters %}&{{ f.field }}={{ f.value }}{% endfor %}">Previous</a>
     {% else %}
         <a class="pagination-previous" disabled>Previous</a>
     {% endif %}
 
     <!-- Další stránka -->
     {% if stocks.has_next %}
-        <a class="pagination-next" href="?page={{ stocks.next_page_number }}">Next</a>
+        <a class="pagination-next" href="?page={{ stocks.next_page_number }}{% for f in filters %}&{{ f.field }}={{ f.value }}{% endfor %}">Next</a>
     {% else %}
         <a class="pagination-next" disabled>Next</a>
     {% endif %}
@@ -141,11 +145,12 @@
             {% if num == stocks.number %}
                 <li><a class="pagination-link is-current" aria-label="Page {{ num }}" aria-current="page">{{ num }}</a></li>
             {% elif num > stocks.number|add:'-3' and num < stocks.number|add:'3' %}
-                <li><a class="pagination-link" href="?page={{ num }}">{{ num }}</a></li>
+                <li><a class="pagination-link" href="?page={{ num }}{% for f in filters %}&{{ f.field }}={{ f.value }}{% endfor %}">{{ num }}</a></li>
             {% endif %}
         {% endfor %}
     </ul>
 </nav>
+
 </section>
 
 <div class="modal" id="filterModal">

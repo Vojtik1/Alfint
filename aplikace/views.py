@@ -52,7 +52,7 @@ for dataset_name, variant in datasets:
 
 def home(request):
     if request.user.is_authenticated:
-        return redirect('main_page')  # Přesměrování na hlavní stránku pro přihlášené uživatele
+        return redirect('main_page')
     return render(request, 'home.html')
 
 
@@ -306,7 +306,7 @@ def filter(request):
         return redirect(request.path)
 
     context = {
-        'stocks': stocks,
+        'stocks': page_obj,
         'filters': filters,
         'ratios': ratios,
         'sectors': list(unique_sectors),
@@ -600,20 +600,27 @@ def add_all_filtered_to_portfolio(request):
     portfolio_id = request.POST.get('portfolio_id')
     filtered_tickers = request.POST.get('filtered_tickers')
 
-    if not portfolio_id or not filtered_tickers:
-        return HttpResponse("Missing data: portfolio ID or filtered tickers", status=400)
+    # 🛠️ Ladící logy pro kontrolu dat
+    print(f"POST data: {request.POST}")
 
+    if not portfolio_id or not filtered_tickers:
+        messages.error(request, 'Missing data: portfolio ID or filtered tickers')
+        return redirect(request.META.get('HTTP_REFERER', '/'))  # Vrátí uživatele zpět na stránku
+
+    # Načtení portfolia podle ID
     portfolio = get_object_or_404(Portfolio, id=portfolio_id, user=request.user)
 
+    # Rozdělení seznamu tickerů (čárka jako oddělovač)
     tickers = filtered_tickers.split(',')
+
     for ticker in tickers:
-        clean_ticker = ticker.split(' - ')[0].strip()  # Odebrání názvu společnosti
+        clean_ticker = ticker.strip()
         if not Stock.objects.filter(ticker=clean_ticker).exists():
-            print(f"Tento ticker neexistuje: {clean_ticker}")
+            print(f"Ticker {clean_ticker} neexistuje v databázi.")
             continue
 
-        if not PortfolioStock.objects.filter(portfolio=portfolio, ticker=clean_ticker).exists():
-            PortfolioStock.objects.create(portfolio=portfolio, ticker=clean_ticker)
+        # Přidáme ticker do portfolia, pokud tam ještě není
+        PortfolioStock.objects.get_or_create(portfolio=portfolio, ticker=clean_ticker)
 
     messages.success(request, "All filtered stocks have been successfully added to your portfolio.")
     return redirect('view_portfolio', portfolio_id=portfolio_id)
