@@ -1,14 +1,110 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+    /* Specifický styl pro stránku portfolio_detail */
+    .section {
+        margin-left: 300px; /* Posunout obsah vedle sidebaru */
+        padding-top: 40px; /* Zajistit odsazení od horního okraje */
+    }
+
+    .container {
+        max-width: 1200px; /* Omezit šířku kontejneru */
+    }
+
+    h1.title {
+        font-size: 2.5rem; /* Zvýšit velikost titulku */
+        color: #4A90E2; /* Modrá barva pro titulek */
+        margin-bottom: 20px;
+    }
+
+    h2.subtitle {
+        font-size: 1.5rem; /* Zvýšit velikost podtitulků */
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    table.table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+    }
+
+    table.table th, table.table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table.table th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+    }
+
+    table.table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    table.table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+
+    .button.is-link {
+        background-color: #4A90E2;
+        color: white;
+    }
+
+    .button.is-link:hover {
+        background-color: #357ABD;
+    }
+
+    .button.is-success {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .button.is-success:hover {
+        background-color: #218838;
+    }
+
+    .button.is-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .button.is-danger:hover {
+        background-color: #c82333;
+    }
+
+    #interactive-chart {
+        height: 500px; /* Zvětšit výšku grafu */
+        margin-top: 40px;
+    }
+
+    .form-container {
+        margin-top: 30px;
+    }
+
+    .form-container form {
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
+
 <section class="section">
     <div class="container">
         <h1 class="title">Portfolio: {{ portfolio.name }}</h1>
         <h2 class="subtitle">Detaily o akciích v portfoliu</h2>
         <h2 class="subtitle">Průměrný výnos portfolia: {{ avg_return|floatformat:2 }}%</h2>
+
         <table class="table is-fullwidth">
-
-
             <thead>
                 <tr>
                     <th>Název akcie</th>
@@ -24,7 +120,7 @@
                 {% if stocks %}
                     {% for item in stocks %}
                         <tr>
-                            <td><a href="{% url 'stock_detail' item.stock.ticker %}">{{ item.stock.name }}</a></td>
+                            <td><a href="{% url 'stock_detail' item.stock.ticker %}" class="has-text-link">{{ item.stock.name }}</a></td>
                             <td>{{ item.stock.ticker }}</td>
                             <td>{{ item.stock.market_cap|floatformat:2|default:"N/A" }}</td>
                             <td>{{ item.stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
@@ -46,7 +142,6 @@
             <div id="interactive-chart"></div>
             <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
             <script>
-                // Načtení dat z kontextu
                 const chartData = {{ chart_data|safe }};
                 Plotly.newPlot('interactive-chart', chartData.data, chartData.layout);
             </script>
@@ -54,15 +149,18 @@
             <p>Žádné dostupné údaje pro vytvoření grafu.</p>
         {% endif %}
 
-        <a href="/user_portfolios/" class="button is-link mt-5">Zpět na přehled portfolií</a>
-        <form method="post" action="{% url 'toggle_share' portfolio.id %}">
-            {% csrf_token %}
-            {% if portfolio.is_shared %}
-                <button class="button is-danger" type="submit">Přestat sdílet</button>
-            {% else %}
-                <button class="button is-success" type="submit">Sdílet portfolio</button>
-            {% endif %}
-        </form>
+        <div class="form-container">
+            <a href="/user_portfolios/" class="button is-link">Zpět na přehled portfolií</a>
+            <form method="post" action="{% url 'toggle_share' portfolio.id %}">
+                {% csrf_token %}
+                {% if portfolio.is_shared %}
+                    <button class="button is-danger" type="submit">Přestat sdílet</button>
+                {% else %}
+                    <button class="button is-success" type="submit">Sdílet portfolio</button>
+                {% endif %}
+            </form>
+        </div>
     </div>
 </section>
+
 {% endblock %}
