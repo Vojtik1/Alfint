@@ -1,23 +1,113 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-{% block title %}Login{% endblock %}
+        /* Login Container */
+        .login-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
 
-{% block content %}
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h3 class="text-center text-primary">Login</h3>
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" class="form-control" id="username" name="username" required>
-                </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
+        /* Heading */
+        .login-container h3 {
+            color: #4a90e2;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Form Styles */
+        .login-container .form-group {
+            margin-bottom: 15px;
+        }
+
+        .login-container .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .login-container .form-control {
+            width: 100%;
+            padding: 10px;
+            font-size: 0.9rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Submit Button */
+        .login-container .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #4a90e2;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-container .btn:hover {
+            background-color: #357ab8;
+        }
+
+        /* Additional Links */
+        .login-container .text-center {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .login-container .text-center a {
+            color: #4a90e2;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .login-container .text-center a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h3>Welcome Back!</h3>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <div class="text-center">
+            <p>Don't have an account? <a href="/signup">Sign up here</a></p>
         </div>
     </div>
-{% endblock %}
+</body>
+</html>

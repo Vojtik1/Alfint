@@ -1,52 +1,432 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Portfolio Sharing</title>
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
 
-{% block title %}Home - Portfolio Sharing{% endblock %}
+    /* Header Styling */
+    <style>
+    header {
+        background-color: #007bff;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        padding: 15px 30px;
+    }
 
-{% block content %}
-<section class="section">
-    <div class="container">
-        <h1 class="title has-text-centered">Welcome to Portfolio Sharing</h1>
+    /* Logo - Alfint */
+    .navbar-brand {
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
 
-        <div class="box">
-            {% if user.is_authenticated %}
-                <p class="has-text-weight-bold">Hello, {{ user.username }}!</p>
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button class="button is-danger is-light" type="submit">Logout</button>
-                </form>
-            {% else %}
-                <p>You are not logged in. <a href="{% url 'login' %}">Login here</a></p>
-            {% endif %}
+    .navbar-brand a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* Search Bar */
+    .navbar-search {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+        padding-left: 20px;
+    }
+
+    .navbar-search .field {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .navbar-search input {
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        color: #333;
+        margin-right: 10px;
+        transition: border-color 0.3s ease;
+    }
+
+    /* Focus effect for input */
+    .navbar-search input:focus {
+        border-color: #0056b3;
+        outline: none;
+    }
+
+    /* Logout Button */
+    .logout-btn {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-left: 20px;
+    }
+
+    .logout-btn-button {
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 1rem;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    /* Hover effect for logout button */
+    .logout-btn-button:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .logout-btn-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.5);
+    }
+
+/* Výchozí styl minimalizovaného sidebaru */
+.sidebar {
+    width: 80px;
+    background-color: #343a40;
+    color: white;
+    padding: 20px 10px;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    text-align: center;
+    overflow: hidden; /* Zabrání přesahu obsahu */
+    transition: width 0.3s ease-in-out;
+}
+
+/* Otevření sidebaru při najetí myší */
+.sidebar:hover {
+    width: 250px;
+    padding: 30px 20px;
+    text-align: left; /* Zarovná text vlevo */
+}
+
+/* Styl pro nadpis uvnitř sidebaru */
+.sidebar h2 {
+    color: #ffffff;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: none; /* Skryjeme nadpis, pokud je sidebar minimalizovaný */
+}
+
+/* Zobrazí nadpis při najetí na sidebar */
+.sidebar:hover h2 {
+    display: block;
+}
+
+/* Odkazy v sidebaru */
+.sidebar a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    display: block;
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s, padding-left 0.3s ease;
+}
+
+/* Zarovná text doleva při otevření */
+.sidebar:hover a {
+    text-align: left;
+}
+
+/* Hover efekt pro odkazy */
+.sidebar a:hover {
+    background-color: #495057;
+    padding-left: 20px;
+}
+
+/* Ikony jsou vždy viditelné */
+.sidebar a i {
+    font-size: 2rem;
+    margin-right: 0;
+}
+
+/* Skryjeme text vedle ikon v minimalizovaném stavu */
+.sidebar a span {
+    display: none;
+}
+
+/* Zobrazí text vedle ikon při otevření sidebaru */
+.sidebar:hover a span {
+    display: inline;
+}
+
+    /* Main Content Styling */
+    .main-content {
+        margin-left: 250px;
+        padding: 30px;
+        flex-grow: 1;
+        background-color: #f1f1f1;
+        min-height: 100vh;
+    }
+
+    h1 {
+        font-size: 3rem;
+        color: #007bff;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .box {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+
+    .card-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #007bff;
+    }
+
+    .card-content {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .portfolio-box {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 8px;
+        width: calc(33.333% - 20px);
+        box-sizing: border-box;
+        transition: transform 0.3s ease-in-out;
+        border: 1px solid #ddd;
+    }
+
+    .portfolio-box:hover {
+        transform: translateY(-5px);
+    }
+
+    .portfolio-box a {
+        font-size: 1.1rem;
+        color: #007bff;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .portfolio-box p {
+        color: #555;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 100%;
+            position: relative;
+            box-shadow: none;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 20px;
+        }
+
+        .portfolio-box {
+            width: 100%;
+        }
+
+        /* Add a hamburger menu for mobile devices */
+        .navbar-search {
+            display: none;
+        }
+    }
+
+    /* Dropdown Styling for Suggestions */
+    #suggestions-list {
+        position: absolute;
+        max-height: 500px;
+        overflow-y: auto;
+        background-color: white;
+        border: 1px solid #ccc;
+        width: 10%;
+        z-index: 9999;
+        margin-top: 50px;
+        border-radius: 5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #suggestions-list li {
+        padding: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        border-bottom: 1px solid #ddd;
+        color: #333;
+    }
+
+    #suggestions-list li:hover {
+        background-color: #f0f0f0;
+    }
+    </style>
+
+</head>
+<body>
+    <header>
+        <div class="navbar-brand">
+            <a href="/">Alfint</a>
         </div>
 
-        <div class="card mt-5">
-            <header class="card-header">
-                <p class="card-header-title">Sdílená portfolia</p>
-            </header>
+        <div class="navbar-search">
+            <div class="field has-addons">
+                <div class="control">
+                    <input id="stock-search" class="input" type="text" placeholder="Search stocks..." aria-label="Search" autocomplete="off">
+                </div>
+            </div>
+            <ul id="suggestions-list" class="dropdown-menu" style="display: none;"></ul>
+        </div>
+
+        <div class="logout-btn">
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="logout-btn-button">Logout</button>
+    </form>
+</div>
+
+    </header>
+
+     <div class="sidebar">
+    <h2>Menu</h2>
+    <a href="/create_portfolio" class="create-portfolio">
+        <i class="fas fa-plus-circle"></i><span>Create Portfolio</span>
+    </a>
+    <a href="/filter" class="use-filter">
+        <i class="fas fa-filter"></i><span>Use Filter</span>
+    </a>
+    <a href="{% url 'user_portfolios' %}" class="your-portfolios">
+        <i class="fas fa-briefcase"></i><span>Your Portfolios</span>
+    </a>
+</div>
+
+
+
+
+    <div class="main-content">
+        <div class="card">
+            <div class="card-header">
+                <p>Shared Portfolios</p>
+            </div>
             <div class="card-content">
-                <ul>
-                    {% if shared_portfolios %}
-                        {% for portfolio in shared_portfolios %}
-                            <li>
-                                <a href="{% url 'view_portfolio' portfolio.id %}">{{ portfolio.name }}</a>
-                                ({{ portfolio.user.username }})
-                            </li>
-                        {% endfor %}
-                    {% else %}
-                        <p>No shared portfolios available.</p>
-                    {% endif %}
-                </ul>
+                {% if shared_portfolios %}
+                    {% for portfolio in shared_portfolios %}
+                        <div class="portfolio-box">
+                            <a href="{% url 'view_portfolio' portfolio.id %}">{{ portfolio.name }}</a>
+                            <p>Shared by {{ portfolio.user.username }}</p>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No shared portfolios available.</p>
+                {% endif %}
             </div>
         </div>
-
-        <div class="box mt-5">
-            <h2 class="title is-4">Select one of the options below:</h2>
-            <ul>
-                <li><a href="/create_portfolio" class="button is-link is-light mt-2">Create a portfolio manually</a></li>
-                <li><a href="/filter" class="button is-link is-light mt-2">Use a filter to select stocks</a></li>
-                <li><a href="{% url 'user_portfolios' %}" class="button is-link is-light mt-2">View your portfolios</a></li>
-            </ul>
-        </div>
     </div>
-</section>
-{% endblock %}
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('stock-search');
+            const suggestionsList = document.getElementById('suggestions-list');
+
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.trim();
+
+                if (query.length > 0) {
+                    fetch(`/stock_suggestions/?q=${query}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            suggestionsList.innerHTML = '';
+                            if (data.length > 0) {
+                                data.forEach(stock => {
+                                    const li = document.createElement('li');
+                                    li.classList.add('dropdown-item');
+                                    li.innerHTML = `${stock.ticker} - ${stock.name}`;
+                                    li.addEventListener('click', function() {
+                                        window.location.href = `/stock/${stock.ticker}`; // Redirect to the stock detail page
+                                    });
+                                    suggestionsList.appendChild(li);
+                                });
+                                suggestionsList.style.display = 'block';
+                            } else {
+                                suggestionsList.style.display = 'none';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching stock suggestions:', error);
+                        });
+                } else {
+                    suggestionsList.style.display = 'none';
+                }
+            });
+
+            // Close the suggestions list when clicking outside the search bar
+            document.addEventListener('click', function(event) {
+                if (!searchInput.contains(event.target) && !suggestionsList.contains(event.target)) {
+                    suggestionsList.style.display = 'none';
+                }
+            });
+        });
+
+        // Function to toggle sidebar visibility
+        function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const mainContent = document.querySelector('.main-content');
+
+    // Toggle classes for sidebar and main content
+    sidebar.classList.toggle('sidebar-hidden');
+    mainContent.classList.toggle('sidebar-hidden');
+
+    // Toggle between full version and icon-only version of the sidebar
+    sidebar.classList.toggle('icon-only');
+
+}
+    </script>
+
+</body>
+</html>

@@ -1,13 +1,106 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-{% block title %}Sign Up{% endblock %}
+        /* Signup Container */
+        .signup-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
 
-{% block content %}
-    <h2>Sign Up</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
-    </form>
-    <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
-{% endblock %}
+        /* Heading */
+        .signup-container h3 {
+            color: #4a90e2;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Style for the form */
+        form p {
+            margin-bottom: 20px; /* Space between form elements */
+        }
+
+        form label {
+            font-weight: 600;
+            color: #333;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        form input {
+            width: 100%;
+            padding: 10px;
+            font-size: 0.9rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Submit Button */
+        .signup-container .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #4a90e2;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .signup-container .btn:hover {
+            background-color: #357ab8;
+        }
+
+        /* Additional Links */
+        .signup-container .text-center {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .signup-container .text-center a {
+            color: #4a90e2;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .signup-container .text-center a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <h3>Create Your Account</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn">Sign Up</button>
+        </form>
+        <div class="text-center">
+            <p>Already have an account? <a href="/login">Login here</a></p>
+        </div>
+    </div>
+</body>
+</html>

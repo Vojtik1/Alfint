@@ -523,11 +523,14 @@ def signup(request):
 def stock_suggestions(request):
     query = request.GET.get('q', '')
     if query:
-        suggestions = Stock.objects.filter(ticker__icontains=query)[:10]
+        suggestions = Stock.objects.filter(
+            Q(ticker__icontains=query) | Q(name__icontains=query)
+        )[:10]
         data = [{"ticker": stock.ticker, "name": stock.name} for stock in suggestions]
     else:
         data = []
     return JsonResponse(data, safe=False)
+
 
 
 @login_required
@@ -600,7 +603,7 @@ def add_all_filtered_to_portfolio(request):
     portfolio_id = request.POST.get('portfolio_id')
     filtered_tickers = request.POST.get('filtered_tickers')
 
-    # 🛠️ Ladící logy pro kontrolu dat
+    # Ladící logy pro kontrolu dat
     print(f"POST data: {request.POST}")
 
     if not portfolio_id or not filtered_tickers:
