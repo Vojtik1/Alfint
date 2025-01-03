@@ -6,41 +6,204 @@
 <section class="section">
     <div class="container">
         <h1 class="title has-text-centered" style="color: #6a0dad;">{{ stock.name }} ({{ stock.ticker }})</h1>
+
+        <!-- Styly pro stránku stock_detail -->
+        <style>
+            .section {
+                margin-left: 300px; /* Posunout obsah vedle sidebaru */
+                padding-top: 40px; /* Zajistit odsazení od horního okraje */
+            }
+
+            .box {
+                border-radius: 8px;
+                margin-bottom: 20px;
+                padding: 20px;
+                background-color: #f9f9f9;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .box h2 {
+                color: #6a0dad;
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+            }
+
+            .box p {
+                font-size: 1.1rem;
+                line-height: 1.5;
+            }
+
+            .content ul {
+                list-style-type: none;
+                padding-left: 0;
+            }
+
+            .content ul li {
+                font-size: 1.1rem;
+                margin-bottom: 8px;
+            }
+
+            .content ul li strong {
+                font-weight: bold;
+                color: #6a0dad;
+            }
+
+            #stock-price-chart {
+                width: 100%;
+                height: 400px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .button {
+                margin-top: 20px;
+            }
+        </style>
+
+        <!-- Basic Information Box -->
         <div class="box" style="border-top: 4px solid #6a0dad;">
             <h2 class="subtitle">Basic Information</h2>
-            <p><strong>Market Cap:</strong> {{ stock.market_cap }}</p>
-            <p><strong>Last Price:</strong> {{ stock.last_price}}</p>
-            <p><strong>P/E Ratio:</strong> {{ stock.pe_ratio }}</p>
-            <p><strong>Beta:</strong> {{ stock.beta}}</p>
+            <p><strong>Name:</strong> {{ stock.name|default:"N/A" }}</p>
+            <p><strong>Ticker:</strong> {{ stock.ticker|default:"N/A" }}</p>
+            <p><strong>Last Price:</strong> {{ stock.last_price|default:"N/A" }}</p>
+            <p><strong>Market Cap:</strong> {{ stock.market_cap|default:"N/A" }}</p>
+            <p><strong>P/E Ratio:</strong> {{ stock.pe_ratio|default:"N/A" }}</p>
+            <p><strong>EBITDA:</strong> {{ stock.ebitda|default:"N/A" }}</p>
+            <p><strong>Beta:</strong> {{ stock.beta|default:"N/A" }}</p>
+            <p><strong>Enterprise Value:</strong> {{ stock.enterprise_value|default:"N/A" }}</p>
+            <p><strong>Sector:</strong> {{ stock.sector|default:"N/A" }}</p>
+            <p><strong>Industry:</strong> {{ stock.industry|default:"N/A" }}</p>
         </div>
-        {% if chart_image %}
-            <div class="box" style="border-top: 4px solid #6a0dad;">
-                <h2 class="subtitle">Stock Price Chart</h2>
-                <img src="data:image/png;base64,{{ chart_image }}" alt="Stock Price Chart">
-            </div>
+
+        <!-- Graf ceny akcie -->
+        <h2 class="subtitle">Graf vývoje ceny akcie</h2>
+        {% if chart_data %}
+            <div id="interactive-chart"></div>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+            <script>
+                const chartData = {{ chart_data|safe }};
+                Plotly.newPlot('interactive-chart', chartData.data, chartData.layout);
+            </script>
+        {% else %}
+            <p>Žádné dostupné údaje pro vytvoření grafu.</p>
         {% endif %}
+
+        <!-- Financial Statements -->
         <div class="box" style="border-top: 4px solid #6a0dad;">
             <h2 class="subtitle">Financial Statements</h2>
-            <div class="content">
-                <h3>Income Statements</h3>
-                <ul>
-                    {% for statement in income_statements %}
-                        <li><strong>{{ statement.fiscal_year }}:</strong> Revenue: {{ statement.revenue }}, Net Income: {{ statement.net_income }}</li>
-                    {% endfor %}
-                </ul>
-                <h3>Balance Sheets</h3>
-                <ul>
-                    {% for statement in balance_sheets %}
-                        <li><strong>{{ statement.fiscal_year }}:</strong> Total Assets: {{ statement.total_assets }}, Total Liabilities: {{ statement.total_liabilities }}</li>
-                    {% endfor %}
-                </ul>
-                <h3>Cash Flow Statements</h3>
-                <ul>
-                    {% for statement in cash_flow_statements %}
-                        <li><strong>{{ statement.fiscal_year }}:</strong> Operating Cash Flow: {{ statement.operating_cash_flow }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+
+            <!-- Income Statements -->
+            <h3>Income Statements</h3>
+            {% if income_statements %}
+                <table class="table is-fullwidth is-striped">
+                    <thead>
+                        <tr>
+                            <th>Fiscal Year</th>
+                            <th>Revenue</th>
+                            <th>Cost of Revenue</th>
+                            <th>Gross Profit</th>
+                            <th>Operating Expenses</th>
+                            <th>Net Income</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for statement in income_statements %}
+                            <tr>
+                                <td>{{ statement.fiscal_year }}</td>
+                                <td>{{ statement.revenue|default:"N/A" }}</td>
+                                <td>{{ statement.cost_of_revenue|default:"N/A" }}</td>
+                                <td>{{ statement.gross_profit|default:"N/A" }}</td>
+                                <td>{{ statement.operating_expenses|default:"N/A" }}</td>
+                                <td>{{ statement.net_income|default:"N/A" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Žádné dostupné výkazy zisku.</p>
+            {% endif %}
+
+            <!-- Balance Sheets -->
+            <h3>Balance Sheets</h3>
+            {% if balance_sheets %}
+                <table class="table is-fullwidth is-striped">
+                    <thead>
+                        <tr>
+                            <th>Fiscal Year</th>
+                            <th>Total Assets</th>
+                            <th>Total Liabilities</th>
+                            <th>Total Equity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for statement in balance_sheets %}
+                            <tr>
+                                <td>{{ statement.fiscal_year }}</td>
+                                <td>{{ statement.total_assets|default:"N/A" }}</td>
+                                <td>{{ statement.total_liabilities|default:"N/A" }}</td>
+                                <td>{{ statement.total_equity|default:"N/A" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Žádné dostupné rozvahy.</p>
+            {% endif %}
+
+            <!-- Cash Flow Statements -->
+            <h3>Cash Flow Statements</h3>
+            {% if cash_flow_statements %}
+                <table class="table is-fullwidth is-striped">
+                    <thead>
+                        <tr>
+                            <th>Fiscal Year</th>
+                            <th>Operating Cash Flow</th>
+                            <th>Investing Cash Flow</th>
+                            <th>Financing Cash Flow</th>
+                            <th>Free Cash Flow</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for statement in cash_flow_statements %}
+                            <tr>
+                                <td>{{ statement.fiscal_year }}</td>
+                                <td>{{ statement.operating_cash_flow|default:"N/A" }}</td>
+                                <td>{{ statement.investing_cash_flow|default:"N/A" }}</td>
+                                <td>{{ statement.financing_cash_flow|default:"N/A" }}</td>
+                                <td>{{ statement.free_cash_flow|default:"N/A" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Žádné dostupné výkazy peněžního toku.</p>
+            {% endif %}
+        </div>
+
+        <!-- Financial Ratios Box -->
+        <div class="box" style="border-top: 4px solid #6a0dad;">
+            <h2 class="subtitle">Financial Ratios</h2>
+            <ul>
+                <li><strong>ROA:</strong> {{ stock.roa|default:"N/A" }}</li>
+                <li><strong>ROE:</strong> {{ stock.roe|default:"N/A" }}</li>
+                <li><strong>Debt to Equity Ratio:</strong> {{ stock.debt_to_equity|default:"N/A" }}</li>
+                <li><strong>Gross Profit Margin:</strong> {{ stock.gross_profit_margin|default:"N/A" }}</li>
+                <li><strong>Operating Profit Margin:</strong> {{ stock.operating_profit_margin|default:"N/A" }}</li>
+                <li><strong>Net Profit Margin:</strong> {{ stock.net_profit_margin|default:"N/A" }}</li>
+                <li><strong>Current Ratio:</strong> {{ stock.current_ratio|default:"N/A" }}</li>
+                <li><strong>Quick Ratio:</strong> {{ stock.quick_ratio|default:"N/A" }}</li>
+                <li><strong>Altman Z-Score:</strong> {{ stock.altman_z_score|default:"N/A" }}</li>
+                <li><strong>EV to Revenue Ratio:</strong> {{ stock.ev_to_revenue_ratio|default:"N/A" }}</li>
+                <li><strong>Price to Sales Ratio:</strong> {{ stock.price_to_sales_ratio|default:"N/A" }}</li>
+                <li><strong>Price to Book Ratio:</strong> {{ stock.price_to_book_ratio|default:"N/A" }}</li>
+                <li><strong>Interest Coverage Ratio:</strong> {{ stock.interest_coverage_ratio|default:"N/A" }}</li>
+                <li><strong>Dividend Payout Ratio:</strong> {{ stock.dividend_payout_ratio|default:"N/A" }}</li>
+                <li><strong>Dividend Yield:</strong> {{ stock.dividend_yield|default:"N/A" }}</li>
+                <li><strong>Cash Flow to Debt Ratio:</strong> {{ stock.cash_flow_to_debt_ratio|default:"N/A" }}</li>
+                <li><strong>ROIC:</strong> {{ stock.roic|default:"N/A" }}</li>
+            </ul>
         </div>
     </div>
 </section>

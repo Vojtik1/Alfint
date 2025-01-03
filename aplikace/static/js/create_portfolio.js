@@ -1,5 +1,4 @@
-
-    let currentPage = 1;
+let currentPage = 1;
 
     function loadStocks(page) {
         fetch(`/load_stocks/?page=${page}`)

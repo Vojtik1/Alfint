@@ -2,6 +2,236 @@
 {% block title %}Filter Stocks{% endblock %}
 
 {% block content %}
+
+<style>
+    /* Obecné nastavení */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.section {
+    padding: 20px 0;
+}
+
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Nadpisy */
+h1.title, h2.subtitle {
+    color: #6a0dad;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+h1.title {
+    text-align: center;
+    font-size: 1.8em;
+    margin-bottom: 30px;
+}
+
+/* Filtrovací boxy */
+.box {
+    background-color: #fafafa;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.filter-box {
+    padding: 10px 15px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    transition: box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.filter-box:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.select {
+    display: inline-block;
+    position: relative;
+}
+
+.select select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+/* Tlačítka */
+.button {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.button.is-link {
+    background-color: #6a0dad;
+    color: #fff;
+}
+
+.button.is-link:hover {
+    background-color: #4e0671;
+}
+
+.button.is-danger {
+    background-color: #e63946;
+    color: white;
+}
+
+.button.is-danger:hover {
+    background-color: #a72832;
+}
+
+.button.is-small {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+}
+
+.mt-2 {
+    margin-top: 10px;
+}
+
+/* Tabulka */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.table th, .table td {
+    padding: 10px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #6a0dad;
+    color: white;
+    font-weight: bold;
+}
+
+.table td {
+    border-bottom: 1px solid #ddd;
+}
+
+.table.is-hoverable tr:hover {
+    background-color: #f9f9f9;
+}
+
+.table.is-striped tr:nth-child(odd) {
+    background-color: #f8f8fc;
+}
+
+/* Modální okno */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.is-active {
+    display: flex;
+}
+
+.modal-card {
+    background: #fff;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card-head, .modal-card-foot {
+    background-color: #f4f4f9;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-card-title {
+    font-weight: bold;
+    color: #6a0dad;
+}
+
+.modal-card-body {
+    padding: 20px;
+}
+
+.modal-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+/* Stránkování */
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-list {
+    display: flex;
+    gap: 5px;
+}
+
+.pagination-link {
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #6a0dad;
+    transition: background-color 0.2s;
+}
+
+.pagination-link:hover {
+    background-color: #f4f4f9;
+}
+
+.pagination-link.is-current {
+    background-color: #6a0dad;
+    color: white;
+}
+
+</style>
+
 <section class="section">
     <div class="container">
         <!-- Filter Section -->
@@ -49,7 +279,6 @@
                 {% endfor %}
             </div>
             <a href="?clear_filters=true" class="button is-danger is-small mt-2">Clear Filters</a>
-            <a href="?clear_filters=true" class="button is-danger is-small mt-2" onclick="confirmFilter()">Confirm</a>
         </div>
 
 
@@ -60,32 +289,28 @@
         </div>
 
         {% if user.is_authenticated and user.portfolios.exists %}
-    <form method="post" action="{% url 'add_all_filtered_to_portfolio' %}">
-        {% csrf_token %}
-
-        <div class="field">
-            <label class="label">Select Portfolio</label>
-            <div class="control">
-                <div class="select">
-                    <select name="portfolio_id" required>
-                        {% for portfolio in user.portfolios.all %}
-                            <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+    <form method="post" action="{% url 'add_all_filtered_to_portfolio' %}" onsubmit="collectAllTickers()">
+    {% csrf_token %}
+    <div class="field">
+        <label class="label">Select Portfolio</label>
+        <div class="control">
+            <div class="select">
+                <select name="portfolio_id" required>
+                    {% for portfolio in user.portfolios.all %}
+                        <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
+    </div>
+    <div class="control" style="text-align: center; margin-top: 20px;">
+        <button class="button is-link" type="submit">Add All to Portfolio</button>
+    </div>
+    <input type="hidden" name="filtered_tickers" id="filtered_tickers" value="{{ all_tickers|join:',' }}">
 
-        <div class="control" style="text-align: center; margin-top: 20px;">
-            <button class="button is-link" type="submit">Add All to Portfolio</button>
-        </div>
+</form>
 
-        <!-- Skryté pole s tickery -->
-        <input type="hidden" name="filtered_tickers" value="{{ all_tickers|join:',' }}">
-    </form>
 {% endif %}
-
-
 
 
         <!-- Filtered Stocks Table -->
@@ -123,21 +348,23 @@
     </table>
 </div>
     </div>
-    <!-- PAGINATION CONTROLS -->
+  <!-- PAGINATION CONTROLS -->
 <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-    <!-- Předchozí stránka -->
-    {% if stocks.has_previous %}
-        <a class="pagination-previous" href="?page={{ stocks.previous_page_number }}{% for f in filters %}&{{ f.field }}={{ f.value }}{% endfor %}">Previous</a>
-    {% else %}
-        <a class="pagination-previous" disabled>Previous</a>
-    {% endif %}
+    <div class="pagination-previous-next">
+        <!-- Předchozí stránka -->
+        {% if stocks.has_previous %}
+            <a class="pagination-previous" href="?page={{ stocks.previous_page_number }}">Previous</a>
+        {% else %}
+            <a class="pagination-previous" disabled>Previous</a>
+        {% endif %}
 
-    <!-- Další stránka -->
-    {% if stocks.has_next %}
-        <a class="pagination-next" href="?page={{ stocks.next_page_number }}{% for f in filters %}&{{ f.field }}={{ f.value }}{% endfor %}">Next</a>
-    {% else %}
-        <a class="pagination-next" disabled>Next</a>
-    {% endif %}
+        <!-- Další stránka -->
+        {% if stocks.has_next %}
+            <a class="pagination-next" href="?page={{ stocks.next_page_number }}">Next</a>
+        {% else %}
+            <a class="pagination-next" disabled>Next</a>
+        {% endif %}
+    </div>
 
     <!-- Seznam čísel stránek -->
     <ul class="pagination-list">
@@ -145,7 +372,7 @@
             {% if num == stocks.number %}
                 <li><a class="pagination-link is-current" aria-label="Page {{ num }}" aria-current="page">{{ num }}</a></li>
             {% elif num > stocks.number|add:'-3' and num < stocks.number|add:'3' %}
-                <li><a class="pagination-link" href="?page={{ num }}{% for f in filters %}&{{ f.field }}={{ f.value }}{% endfor %}">{{ num }}</a></li>
+                <li><a class="pagination-link" href="?page={{ num }}">{{ num }}</a></li>
             {% endif %}
         {% endfor %}
     </ul>
@@ -175,11 +402,12 @@
             </div>
         </section>
         <footer class="modal-card-foot">
-            <button class="button is-success" onclick="addFilter()">Add Filter</button>
-            <button class="button" onclick="closeModal()">Cancel</button>
+            <button class="button is-success is-small" class="modal-card-foot" onclick="addFilter()">Add Filter</button>
+            <button class="button is-light is-small" class="modal-card-foot" onclick="closeModal()">Cancel</button>
         </footer>
     </div>
 </div>
+
 
 <script>
     function openModal() {
@@ -250,9 +478,35 @@
     .catch(error => console.error('Error:', error));
 }
 
-function confirmFilter() {
-        location.reload();
-    }
+function updateFilteredTickers() {
+    const tickers = Array.from(document.querySelectorAll('#stocks tbody tr'))
+        .map(row => row.cells[1].textContent.trim());
+    document.querySelector("input[name='filtered_tickers']").value = tickers.join(',');
+}
+
+// Připojte funkci na submit formuláře
+document.querySelector('form').addEventListener('submit', updateFilteredTickers);
+
+    document.getElementById('add-to-portfolio-form').addEventListener('submit', function(event) {
+        const tickers = Array.from(document.querySelectorAll('#stocks tbody tr'))
+            .map(row => row.cells[1].textContent.trim());
+        this.querySelector("input[name='filtered_tickers']").value = tickers.join(',');
+    });
+
+    function collectAllTickers() {
+    const tickers = [];
+    const tableRows = document.querySelectorAll("#stocks table tbody tr");
+
+    tableRows.forEach(row => {
+        const tickerCell = row.querySelector("td:nth-child(2)");
+        if (tickerCell) {
+            tickers.push(tickerCell.textContent.trim());
+        }
+    });
+
+    document.getElementById("filtered_tickers").value = tickers.join(",");
+}
+
 
 </script>
 

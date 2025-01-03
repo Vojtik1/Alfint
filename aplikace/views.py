@@ -1,4 +1,6 @@
 import json
+
+import plotly
 import simfin as sf
 import csv
 from django.shortcuts import render, redirect
@@ -207,12 +209,6 @@ def load_yfinance_data():
     print("Finished loading Yahoo Finance data.")
 
 
-from django.shortcuts import render, redirect
-from django.http import JsonResponse
-from django.db.models import Q
-from .models import Stock
-import re
-
 def add_filter_to_session(filters, field, value, operator='gte'):
     """Helper function to add a filter to the session."""
     if not any(f['field'] == field and f['value'] == value for f in filters):
@@ -319,7 +315,7 @@ def stock_detail(request, ticker):
     stock_data_yf = yf.Ticker(ticker)
     yf_info = stock_data_yf.info
 
-    # Nejprve načteme nebo vytvoříme záznam pro Stock
+    # Načtení informací o akciích a uložení do databáze
     stock, created = Stock.objects.get_or_create(ticker=ticker)
     stock.name = yf_info.get('shortName')
     stock.last_price = yf_info.get('currentPrice') or yf_info.get('regularMarketPrice') or yf_info.get('previousClose')
@@ -332,25 +328,39 @@ def stock_detail(request, ticker):
     stock.industry = yf_info.get('industry')
     stock.save()
 
+    # Načtení historických cen akcií
     share_prices = SharePrices.objects.filter(stock=stock)
-
     close_prices = [
         {'date': price.date, 'close_price': price.close_price}
         for price in share_prices
     ]
-    chart_image = create_price_chart(close_prices)
 
+    # Připravte data pro graf
+    if close_prices:
+        dates = [price['date'] for price in close_prices]
+        prices = [price['close_price'] for price in close_prices]
+
+        # Vytvoření grafu pomocí Plotly
+        fig = go.Figure(data=[go.Scatter(x=dates, y=prices, mode='lines', name='Close Price')])
+        fig.update_layout(title='Stock Price Over Time', xaxis_title='Date', yaxis_title='Close Price')
+
+        # Převeďte graf na JSON pro použití v šabloně
+        chart_data = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    else:
+        chart_data = None
+
+    # Načtení finančních výkazů pro danou akcii
     income_statements = IncomeStatement.objects.filter(stock=stock)
     balance_sheets = BalanceSheet.objects.filter(stock=stock)
     cash_flow_statements = CashFlowStatement.objects.filter(stock=stock)
 
+    # Přidání všech potřebných dat do kontextu
     context = {
         'stock': stock,
+        'chart_data': chart_data,
         'income_statements': income_statements,
         'balance_sheets': balance_sheets,
         'cash_flow_statements': cash_flow_statements,
-        'share_prices': share_prices,
-        'chart_image': chart_image
     }
 
     return render(request, 'stock_detail.html', context)
@@ -600,33 +610,40 @@ def load_stocks(request):
 @login_required
 @require_POST
 def add_all_filtered_to_portfolio(request):
+    filters = request.session.get('filters', [])
+
+    # Získání všech akcií podle filtrů (bez stránkování)
+    q_object = Q()
+    for f in filters:
+        field = f.get('field')
+        operator = f.get('operator', 'gte')
+        value = f.get('value')
+
+        if field and value:
+            try:
+                if field in ['sector', 'industry']:
+                    q_object &= Q(**{f"{field}__iexact": value})
+                else:
+                    q_object &= Q(**{f"{field}__{operator}": float(value)})
+
+            except (ValueError, TypeError):
+                continue
+
+    # Získání všech akcií odpovídajících filtrům
+    all_stocks = Stock.objects.filter(q_object).order_by('-market_cap')
+
+    # Získání tickers všech akcií
+    tickers_to_add = all_stocks.values_list('ticker', flat=True)
+
+    # Získání portfolia uživatele
     portfolio_id = request.POST.get('portfolio_id')
-    filtered_tickers = request.POST.get('filtered_tickers')
+    portfolio = Portfolio.objects.get(id=portfolio_id)
 
-    # Ladící logy pro kontrolu dat
-    print(f"POST data: {request.POST}")
+    # Přidání všech akcií do portfolia
+    for ticker in tickers_to_add:
+        PortfolioStock.objects.get_or_create(portfolio=portfolio, ticker=ticker)
 
-    if not portfolio_id or not filtered_tickers:
-        messages.error(request, 'Missing data: portfolio ID or filtered tickers')
-        return redirect(request.META.get('HTTP_REFERER', '/'))  # Vrátí uživatele zpět na stránku
-
-    # Načtení portfolia podle ID
-    portfolio = get_object_or_404(Portfolio, id=portfolio_id, user=request.user)
-
-    # Rozdělení seznamu tickerů (čárka jako oddělovač)
-    tickers = filtered_tickers.split(',')
-
-    for ticker in tickers:
-        clean_ticker = ticker.strip()
-        if not Stock.objects.filter(ticker=clean_ticker).exists():
-            print(f"Ticker {clean_ticker} neexistuje v databázi.")
-            continue
-
-        # Přidáme ticker do portfolia, pokud tam ještě není
-        PortfolioStock.objects.get_or_create(portfolio=portfolio, ticker=clean_ticker)
-
-    messages.success(request, "All filtered stocks have been successfully added to your portfolio.")
-    return redirect('view_portfolio', portfolio_id=portfolio_id)
+    return JsonResponse({'success': True})
 
 
 @login_required
