@@ -1,4 +1,4 @@
-# Finanční aplikace na vše Alfint 
+# Finanční aplikace pro backtestování akcií - Alfint 
 
 Alfint je aplikace pro zpětné testování akcií na základě uživatelsky definovaných parametrů. Umožňuje uživatelům zvolit si klíčové finanční ukazatele a strategie, které chtějí otestovat na historických datech, a poskytuje přehledné výsledky, které jim pomohou zhodnotit výkonnost vybraných akcií v minulosti. Cílem aplikace je zefektivnit analýzu investičních strategií a nabídnout uživatelům jednoduchý nástroj pro simulaci jejich obchodních rozhodnutí. Dále nabízí vešekeré finančí ukazatele, ať už dnešní, nebo ty z historie.
 
