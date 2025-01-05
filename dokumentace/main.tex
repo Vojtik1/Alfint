@@ -1,0 +1,664 @@
+\documentclass[12pt, a4paper]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+\usepackage{graphicx}
+\usepackage{lmodern}
+\usepackage{tikz}
+
+%% Proměnné
+\newcommand\obor{INFORMAČNÍ TECHNOLOGIE}
+\newcommand\kodOboru{18-20-M/01}
+\newcommand\zamereni{se zaměřením na počítačové sítě a programování}
+\newcommand\skola{Střední škola průmyslová a umělecká, Opava}
+\newcommand\trida{IT4}
+\newcommand\jmenoAutora{Vojtěch Šíma}
+\newcommand\skolniRok{2024/25}
+\newcommand\datumOdevzdani{31. 12. 2024}
+\newcommand\nazevPrace{Alfint - Aplikace pro zpětné testování akcií}
+
+\title{\nazevPrace}
+\author{\jmenoAutora}
+\date{\datumOdevzdani}
+
+\usepackage[top=2.5cm, bottom=2.5cm, left=3.5cm, right=1.5cm]{geometry} %% nastaví okraje, left -- vnitřní okraj, right -- vnější okraj
+
+\usepackage[czech]{babel} %% balík babel pro sazbu v češtině
+\usepackage[utf8]{inputenc} %% balíky pro kódování textu
+\usepackage[T1]{fontenc}
+\usepackage{cmap} %% balíček zajišťující, že vytvořené PDF bude prohledávatelné a kopírovatelné
+\usepackage{lmodern}  % Přidáno pro lepší podporu českých znaků
+
+\usepackage{graphicx} %% balík pro vkládání obrázků
+
+\usepackage{subcaption} %% balíček pro vkládání podobrázků
+
+\usepackage{hyperref} %% balíček, který v PDF vytváří odkazy
+
+\linespread{1.25} %% řádkování
+\setlength{\parskip}{0.5em} %% odsazení mezi odstavci
+
+
+\usepackage[pagestyles]{titlesec} %% balíček pro úpravu stylu kapitol a sekcí
+
+% Nastavení formátování nadpisů
+\titleformat{\chapter}[hang]
+  {\rmfamily\bfseries\Large}  % Zmenšeno z \LARGE na \Large
+  {\thechapter}
+  {1em}
+  {\MakeUppercase}
+
+\titleformat{\section}[hang]
+  {\rmfamily\bfseries\large}  % Zmenšeno z \Large na \large
+  {\thesection}
+  {1em}
+  {}
+
+\titleformat{\subsection}[hang]
+  {\rmfamily\bfseries\normalsize}  % Zmenšeno z \large na \normalsize
+  {\thesubsection}
+  {1em}
+  {}
+
+% Nastavení mezer před a za nadpisy
+\titlespacing*{\chapter}{0pt}{-30pt}{8pt}  % Zmenšeno z 20pt na 8pt
+\titlespacing*{\section}{0pt}{12pt}{4pt}   % Zmenšeno z 20pt/10pt na 12pt/4pt
+\titlespacing*{\subsection}{0pt}{12pt}{4pt} % Zmenšeno z 20pt/10pt na 12pt/4pt
+
+% Nastavení formátování pro nečíslované nadpisy
+\titleformat{name=\chapter,numberless}[hang]
+  {\rmfamily\bfseries\Large}
+  {}
+  {0pt}
+  {\MakeUppercase}
+
+\titleformat{name=\section,numberless}[hang]
+  {\rmfamily\bfseries\large}  % Zmenšeno z \Large na \large
+  {}
+  {0pt}
+  {}
+
+% Nastavení mezer pro nečíslované nadpisy
+\titlespacing*{name=\chapter,numberless}{0pt}{0pt}{8pt}  % Změněno z -30pt na 0pt pro první mezeru
+\titlespacing*{name=\section,numberless}{0pt}{12pt}{4pt}   % Zmenšeno z 15pt/5pt na 12pt/4pt
+
+% Nastavení fontu pro obsah
+\renewcommand{\cfttoctitlefont}{\rmfamily\LARGE\bfseries}
+\renewcommand{\cftchapfont}{\rmfamily\bfseries}
+\renewcommand{\cftsecfont}{\rmfamily}
+\renewcommand{\cftsubsecfont}{\rmfamily}
+
+% Nastavení číslování pro obsah
+\renewcommand{\cftchappresnum}{\rmfamily\bfseries}
+\renewcommand{\cftsecpresnum}{\rmfamily}
+\renewcommand{\cftsubsecpresnum}{\rmfamily}
+
+\usepackage{tocloft} % Balíček pro přizpůsobení vzhledu obsahu
+\setlength{\cftbeforechapskip}{10pt}  % Větší rozestup pro kapitoly
+\setlength{\cftbeforesecskip}{3pt}   % Menší rozestup pro sekce
+
+% Nastavení odsazení a formátování obsahu
+\cftsetindents{chapter}{0em}{2.5em}
+\cftsetindents{section}{2.5em}{3em}
+\cftsetindents{subsection}{5.5em}{3.7em}
+\renewcommand{\cftdotsep}{2} % Hustota teček
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}} % Tečky i pro kapitoly
+
+\setcounter{secnumdepth}{2}
+\setcounter{tocdepth}{2}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.025pt}
+
+\usepackage{booktabs}
+
+\usepackage{url}
+
+%% Balíčky co se můžou hodit :) 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{pdfpages} %% Balíček umožňující vkládat stránky z PDF souborů, 
+
+\usepackage{upgreek} %% Balíček pro sazbu stojatých řeckých písmen, třeba u jednotky mikrometr. Například stojaté mí: \upmu, stojaté pí: \uppi
+
+\usepackage{amsmath}    %% Balíčky amsmath a amsfonts 
+\usepackage{amsfonts}   %% pro sazbu matematických symbolů
+\usepackage{esint}     %% pro sazbu různých integrálů (např \oiint)
+\usepackage{mathrsfs}
+\usepackage{helvet} % Helvet font
+\usepackage{mathptmx} % Times New Roman
+\usepackage{Oswald} % Oswald font
+
+
+%% makra pro sazbu matematiky
+\newcommand{\dif}{\mathrm{d}} %% makro pro sazbu diferenciálu, místo toho
+%% abych musel psát '\mathrm{d}' mi stačí napsat '\dif' což je mnohem 
+%% kratší a mohu si tak usnadnit práci
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\renewcommand{\lstlistingname}{Kód}% Listing -> Algorithm
+\renewcommand{\lstlistlistingname}{Seznam programových kódů}% List of Listings -> List of Algorithms
+
+%% Definice 
+\lstdefinelanguage{JavaScript}{
+	morekeywords=[1]{break, continue, delete, else, for, function, if, in,
+		new, return, this, typeof, var, void, while, with},
+	% Literals, primitive types, and reference types.
+	morekeywords=[2]{false, null, true, boolean, number, undefined,
+		Array, Boolean, Date, Math, Number, String, Object},
+	% Built-ins.
+	morekeywords=[3]{eval, parseInt, parseFloat, escape, unescape},
+	sensitive,
+	morecomment=[s]{/*}{*/},
+	morecomment=[l]//,
+	morecomment=[s]{/**}{*/}, % JavaDoc style comments
+	morestring=[b]',
+	morestring=[b]"
+}[keywords, comments, strings]
+
+
+\lstdefinelanguage[ECMAScript2015]{JavaScript}[]{JavaScript}{
+	morekeywords=[1]{await, async, case, catch, class, const, default, do,
+		enum, export, extends, finally, from, implements, import, instanceof,
+		let, static, super, switch, throw, try},
+	morestring=[b]` % Interpolation strings.
+}
+
+\lstalias[]{ES6}[ECMAScript2015]{JavaScript}
+
+% Nastavení barev
+% Requires package: color.
+\definecolor{mediumgray}{rgb}{0.3, 0.4, 0.4}
+\definecolor{mediumblue}{rgb}{0.0, 0.0, 0.8}
+\definecolor{forestgreen}{rgb}{0.13, 0.55, 0.13}
+\definecolor{darkviolet}{rgb}{0.58, 0.0, 0.83}
+\definecolor{royalblue}{rgb}{0.25, 0.41, 0.88}
+\definecolor{crimson}{rgb}{0.86, 0.8, 0.24}
+
+% Nastavení pro Python
+\lstdefinestyle{Python}{
+	language=Python,
+	backgroundcolor=\color{white},
+	basicstyle=\ttfamily,
+	breakatwhitespace=false,
+	breaklines=false,
+	captionpos=b,
+	columns=fullflexible,
+	commentstyle=\color{mediumgray}\upshape,
+	emph={},
+	emphstyle=\color{crimson},
+	extendedchars=true,  % requires inputenc
+	fontadjust=true,
+	frame=single,
+	identifierstyle=\color{black},
+	keepspaces=true,
+	keywordstyle=\color{mediumblue},
+	keywordstyle={[2]\color{darkviolet}},
+	keywordstyle={[3]\color{royalblue}},
+	literate=%
+	{á}{{\'a}}1 {č}{{\v{c}}}1 {ď}{{\v{d}}}1 {é}{{\'e}}1 {ě}{{\v{e}}}1
+	{í}{{\'i}}1 {ň}{{\v{n}}}1 {ó}{{\'o}}1 {ř}{{\v{r}}}1 {š}{{\v{s}}}1
+	{ť}{{\v{t}}}1 {ú}{{\'u}}1 {ů}{{\r{u}}}1 {ý}{{\'y}}1 {ž}{{\v{z}}}1,		
+	numbers=left,
+	numbersep=5pt,
+	numberstyle=\tiny\color{black},
+	rulecolor=\color{black},
+	showlines=true,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	stringstyle=\color{forestgreen},
+	tabsize=2,
+	title=\lstname,
+	upquote=true  % requires textcomp	
+}
+
+
+\lstdefinestyle{JSES6Base}{
+	backgroundcolor=\color{white},
+	basicstyle=\ttfamily,
+	breakatwhitespace=false,
+	breaklines=false,
+	captionpos=b,
+	columns=fullflexible,
+	commentstyle=\color{mediumgray}\upshape,
+	emph={},
+	emphstyle=\color{crimson},
+	extendedchars=true,  % requires inputenc
+	fontadjust=true,
+	frame=single,
+	identifierstyle=\color{black},
+	keepspaces=true,
+	keywordstyle=\color{mediumblue},
+	keywordstyle={[2]\color{darkviolet}},
+	keywordstyle={[3]\color{royalblue}},
+ literate=%
+{á}{{\'a}}1 {č}{{\v{c}}}1 {ď}{{\v{d}}}1 {é}{{\'e}}1 {ě}{{\v{e}}}1
+{í}{{\'i}}1 {ň}{{\v{n}}}1 {ó}{{\'o}}1 {ř}{{\v{r}}}1 {š}{{\v{s}}}1
+{ť}{{\v{t}}}1 {ú}{{\'u}}1 {ů}{{\r{u}}}1 {ý}{{\'y}}1 {ž}{{\v{z}}}1,		
+	numbers=left,
+	numbersep=5pt,
+	numberstyle=\tiny\color{black},
+	rulecolor=\color{black},
+	showlines=true,
+	showspaces=false,
+	showstringspaces=false,
+	showtabs=false,
+	stringstyle=\color{forestgreen},
+	tabsize=2,
+	title=\lstname,
+	upquote=true  % requires textcomp
+}
+
+\lstdefinestyle{JavaScript}{
+	language=JavaScript,
+	style=JSES6Base,
+}
+\lstdefinestyle{ES6}{
+	language=ES6,
+	style=JSES6Base
+}
+
+
+%% Bordel pro práci - můžeš smáznout :) 
+%%%%%%%%%%%%%%%%%%%
+
+\usepackage{lipsum} %% balíček který píše lipsum (nesmyslný text, který se používá pro kontrolu typografie)
+
+\begin{document}
+	
+	\pagestyle{empty}
+	\pagenumbering{arabic}
+	
+	\cleardoublepage
+%% Titulní stránka s informacemi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	{\fontfamily{phv}\selectfont
+		%% Logo školy
+		\begin{figure}[h]
+			\centering
+			\includegraphics[width=0.6\linewidth]{logo-skola.png}
+		\end{figure}
+		
+		
+		%% Hlavička práce a její název (viz proměnná \nazev prace)
+		%% \sffamily %%% bezpatkové písmo - sans serif
+		{\bfseries %%% písmo na stránce je tučně
+			\begin{center}
+				\vspace{0.025 \textheight}
+				\LARGE{ZÁVĚREČNÁ STUDIJNÍ PRÁCE}\\
+				\large{dokumentace}\\
+				\vspace{0.075 \textheight}
+				\LARGE {\nazevPrace}\\
+			\end{center}  
+		}%%%
+
+        \begin{figure}[h]
+			\centering
+			\includegraphics[width=0.8\linewidth]{ndAI.png}
+			\label{fig:main-screen}
+		\end{figure}
+
+    \vspace{0.02 \textheight}
+		\begin{table}[h!]
+			\begin{tabular}{ll}
+				\textbf{Autor:} & \jmenoAutora\\ 
+				\textbf{Obor:} & \kodOboru { } \obor\\
+				\textbf{} & \zamereni\\
+				\textbf{Třída:} & \trida\\
+				\textbf{Školní rok:} & \skolniRok\\
+			\end{tabular}
+			
+		\end{table}		
+	}
+	
+	\clearpage
+
+    
+%% Stránka obsahující poděkování a prohlášení
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Poděkování - nepovinné
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+	\noindent{\large{\bfseries{Poděkování}\\}}
+	\noindent Děkuji všem, co mě psychicky podpořili, když jsem v kódu měl tisíce errorů.
+	
+	\vspace*{0.7\textheight} %% Vertikální mezeru je možné upravit
+
+%% Prohlášení - povinné
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	\noindent{\large{\bfseries{Prohlášení}\\}}  %% uprav si koncovky podle toho na jaký rod se cítíš, vypadá to pak lépe :) 
+	\noindent{Prohlašuji, že jsem závěrečnou práci vypracoval samostatně a uvedl veškeré použité 
+		informační zdroje.\\}
+	\noindent{Souhlasím, aby tato studijní práce byla použita k výukovým a prezentačním účelům na Střední průmyslové a umělecké škole v Opavě, Praskova 399/8.}
+	\vfill
+	\noindent{V Opavě \datumOdevzdani\\}
+	\noindent
+	\begin{minipage}{\linewidth}
+		\hspace{9.5cm} 
+		\begin{tabular}{@{}p{6cm}@{}}
+			\dotfill \\
+			Podpis autora
+		\end{tabular}
+	\end{minipage}
+	
+	\clearpage
+
+	\tableofcontents
+	\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%% Stránka obsahující abstrakt (anotaci)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+\noindent{\Large{\bfseries{Abstrakt}\\}}
+Tato práce se zaměřuje na vývoj aplikace pro zpětné testování akcií na základě uživatelsky definovaných parametrů. Aplikace je implementována v jazyce Python s využitím frameworku Django a API SimFin a yfinance. Umožňuje analyzovat historická data, sdílet portfolia a vizualizovat je v přehledné podobě. Dokumentace popisuje architekturu aplikace, implementační detaily a způsoby řešení. Důraz je kladen na přesnost výpočtů a uživatelskou přívětivost. 
+
+\vspace{18pt}
+\noindent{\large{\bfseries{Klíčová slova}}}
+
+\noindent Python, Django, SimFin, yfinance, zpětné testování, finanční analýza, akcie
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+%% Seznam použitých zkratek
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
+\chapter*{Seznam použitých zkratek}
+\begin{tabular}{ll}
+API & Application Programming Interface,\\
+EBITDA & Earnings Before Interest, Taxes, Depreciation, and Amortization,\\
+EPS & Earnings Per Share,\\
+P/E & Price-to-Earnings Ratio,\\
+ROE & Return on Equity,\\
+REST & Representational State Transfer,\\
+SQL & Structured Query Language,\\
+UI & User Interface.\\
+\end{tabular}
+
+%% Definice příkazu pro podnadpisy v úvodu
+\newcommand{\introsubheading}[1]{%
+  {\noindent\textbf{\normalsize #1}\vspace{1pt}\par}%
+}
+
+\chapter*{ÚVOD}
+\addcontentsline{toc}{chapter}{Úvod}
+
+\introsubheading{Představení projektu}
+V současné době, kdy roste zájem o investování a analýzu akciového trhu, je zpětné testování strategií nezbytným nástrojem pro investory. Tento projekt byl vytvořen s cílem poskytnout uživatelům snadno ovladatelnou aplikaci, která umožňuje analyzovat historická data akcií, vypočítávat finanční indikátory a vytvářet přehledné vizualizace. Aplikace je implementována v Pythonu s využitím frameworku Django, API SimFin a yfinance.
+
+\introsubheading{Motivace}
+Hlavní motivací pro vytvoření této aplikace byla osobní zkušenost s nedostatky dostupných nástrojů pro zpětné testování akcií. Většina stávajících řešení postrádá možnost kombinace dat z různých zdrojů a vizualizace klíčových finančních ukazatelů. Cílem bylo vytvořit nástroj, který by nabídl komplexní analýzu a zároveň byl uživatelsky přívětivý.
+
+\introsubheading{Cíle projektu}
+Hlavním cílem bylo vytvořit aplikaci, která umožní:
+\begin{itemize}
+    \item Analyzovat historická data akcií a finančních ukazatelů,
+    \item Vypočítávat klíčové indikátory, jako jsou P/E, ROE, EPS a další,
+    \item Vizualizovat data prostřednictvím grafů a přehledných tabulek,
+    \item Kombinovat data z více zdrojů (SimFin, yfinance),
+    \item Poskytnout uživatelům nástroj pro testování investičních strategií,
+    \item Sdílet mezi sebou portfolia.
+\end{itemize}
+
+\introsubheading{Struktura práce}
+Práce je rozdělena do několika hlavních částí. První kapitola se zabývá teoretickou částí, která popisuje klíčové finanční ukazatele a jejich význam při zpětném testování akcií. Druhá kapitola se věnuje návrhu aplikace, včetně použité architektury, databázového modelu a výběru technologií. Třetí kapitola popisuje implementační část, kde jsou detailně rozebrány funkce aplikace, integrace API a výpočet ukazatelů. Čtvrtá kapitola shrnuje dosažené výsledky a uzavírá práci pohledem na budoucí rozvoj projektu.
+
+\chapter{Teoretická část}
+
+
+\section{Principy zpětného testování akcií}
+
+
+Zpětné testování (backtesting) je klíčovým nástrojem v oblasti finančního investování, který umožňuje ověřit účinnost různých investičních strategií na historických datech. Tento proces poskytuje cenné informace o tom, jak by se strategie chovala v reálných tržních podmínkách, pokud by byla aplikována v minulosti. Základním principem zpětného testování je analýza historických cen akcií, ziskovosti a dalších ukazatelů, které umožňují modelovat chování akcií a simulovat různé obchodní scénáře.
+
+\section{Finanční ukazatele}
+
+Finanční ukazatele jsou zásadní pro analýzu výkonnosti společnosti a rozhodování o investicích. V rámci zpětného testování se zaměřujeme na ukazatele, které poskytují přehled o hodnotě, stabilitě a růstovém potenciálu společnosti. Některé z nejdůležitějších ukazatelů zahrnují:
+
+\begin{itemize}
+    \item \textbf{P/E (Price-to-Earnings Ratio)} – Poměr ceny akcie k jejímu zisku na akcii. Tento ukazatel je často používán k určení, zda je akcie přiměřeně oceněná na základě jejího zisku. Vyšší P/E může znamenat, že investoři očekávají vysoký růst společnosti, zatímco nízké P/E může naznačovat podhodnocení.
+    
+    \item \textbf{ROE (Return on Equity)} – Tento ukazatel ukazuje, jak efektivně společnost využívá kapitál investovaný jejími akcionáři. Vyšší ROE obvykle signalizuje silnou výkonnost společnosti, což může být pozitivním signálem pro investory.
+
+    \item \textbf{EPS (Earnings per Share)} – Zisk na akcii je jedním z nejzákladnějších ukazatelů výkonnosti společnosti. Ukazuje, kolik zisku společnost vydělala na jednu akcii. Tento ukazatel je důležitý pro hodnocení profitability společnosti.
+
+    \item \textbf{P/B (Price-to-Book Ratio)} – Poměr ceny akcie k její účetní hodnotě. Tento ukazatel se používá pro analýzu toho, jak je akcie oceněná ve vztahu k jejím aktivům. Poměr menší než 1 může naznačovat podhodnocení akcie.
+
+    \item \textbf{PEG (Price-to-Earnings Growth Ratio)} – Tento ukazatel kombinuje P/E s růstem zisku. Pomáhá určit, zda je akcie přiměřeně oceněná na základě očekávaného růstu zisku, což poskytuje vyváženější pohled než samotný P/E.
+
+    \item \textbf{Debt-to-Equity Ratio (D/E)} – Poměr dluhu k vlastnímu kapitálu ukazuje, jak společnost financuje své aktivity. Vyšší poměr znamená větší závislost na cizích zdrojích financování, což může znamenat vyšší riziko.
+\end{itemize}
+
+\section{Metoda zpětného testování}
+
+
+Zpětné testování se provádí tak, že se na historických datech testuje vybraná investiční strategie. Proces zahrnuje následující kroky:
+\begin{itemize}
+    \item \textbf{Výběr historických dat} – Získání historických cen akcií a dalších relevantních finančních dat pro dané období.
+    \item \textbf{Implementace strategie} – Definování a aplikování obchodní strategie na základě vybraných ukazatelů (např. P/E, ROE).
+    \item \textbf{Simulace obchodních rozhodnutí} – Vytváření simulace, která na základě historických dat a strategie simuluje nákup a prodeje akcií.
+    \item \textbf{Vyhodnocení výsledků} – Analýza výsledků zpětného testování, zhodnocení výnosů a rizik spojených se strategií.
+\end{itemize}
+
+\section{Historie zpětného testování}
+
+
+Historie zpětného testování sahá až do 70. let 20. století, kdy byly první pokusy o testování obchodních strategií na historických datech prováděny manuálně. S rozvojem výpočetní techniky se zpětné testování stalo mnohem dostupnější a přesnější. V současnosti se používají sofistikované algoritmy a programy, které umožňují rychlé a efektivní testování strategií na velkých historických datech.
+
+\section{Závěr}
+
+
+Zpětné testování je neocenitelný nástroj pro každého investora, který chce ověřit efektivitu své obchodní strategie na historických datech. Kombinace správných finančních ukazatelů, analýzy historických dat a využití pokročilých technik zpětného testování pomáhá minimalizovat rizika a maximalizovat potenciální výnosy.
+
+\chapter{Návrh řešení}
+
+
+\section{Architektura aplikace}
+
+
+Architektura aplikace byla navržena s cílem zajistit modularitu, škálovatelnost a efektivní správu dat. Aplikace je postavena na frameworku Django, který je doplněn knihovnami jako yfinance pro získávání aktuálních a historických dat a SimFin pro přístup k finančním ukazatelům. Celková architektura aplikace zahrnuje následující komponenty:
+
+\begin{itemize}
+    \item \textbf{Frontend} – Uživatelské rozhraní aplikace je navrženo tak, aby bylo přehledné a intuitivní. Umožňuje uživatelům zadávat parametry pro zpětné testování a zobrazuje výsledky ve formě tabulek a grafů.
+    \item \textbf{Backend} – Backend je zodpovědný za získávání dat z externích API (SimFin a yfinance), výpočty finančních ukazatelů a správu databáze. Django REST framework je použit pro vytvoření API pro komunikaci mezi frontendem a backendem.
+    \item \textbf{Databáze} – Databáze je navržena tak, aby uchovávala historická data o akciích, obchodní strategie a výsledky zpětného testování. Používá se PostgreSQL pro její robustnost a škálovatelnost.
+    \item \textbf{Grafy a vizualizace} – Pro vizualizaci výsledků zpětného testování jsou použity knihovny jako Matplotlib a Plotly. Grafy umožňují uživatelům snadno analyzovat výsledky obchodních strategií.
+\end{itemize}
+
+\section{Použité technologie}
+
+
+Aplikace využívá několik moderních technologií pro efektivní získávání dat, jejich analýzu a vizualizaci. Mezi hlavní technologie použité v aplikaci patří:
+
+\begin{itemize}
+    \item \textbf{Django} – Framework pro vývoj webových aplikací, který umožňuje rychlý vývoj a snadnou správu backendu aplikace. Django poskytuje robustní strukturu pro zpracování požadavků, správu databáze a zabezpečení aplikace.
+    \item \textbf{yfinance} – Knihovna pro získávání historických a aktuálních dat o akciích z Yahoo Finance. Tato knihovna je klíčová pro získání historických cen akcií a dalších relevantních dat pro zpětné testování.
+    \item \textbf{SimFin} – API pro získávání finančních ukazatelů a fundamentálních dat o akciích. SimFin poskytuje přístup k datům, které jsou užitečné pro výpočet ukazatelů jako P/E, ROE, EPS a dalších.
+    \item \textbf{PostgreSQL} – Relational database management system, který je použit pro správu dat o akciích, uživatelských strategiích a výsledcích testování. PostgreSQL byla zvolena pro svou spolehlivost, výkon a schopnost pracovat s velkými objemy dat.
+    \item \textbf{Matplotlib a Plotly} – Knihovny pro tvorbu grafů a vizualizací, které jsou použity pro zobrazení výsledků zpětného testování a historických dat.
+\end{itemize}
+
+\section{Databázový model}
+
+
+Databázový model aplikace je navržen tak, aby efektivně uchovával všechna potřebná data pro zpětné testování akcií a správu uživatelských portfolií. Model obsahuje několik hlavních tabulek, které uchovávají informace o akciích, jejich finančních ukazatelích a dalších relevantních údajích.
+
+\begin{figure}[h]
+			\centering
+			\includegraphics[width=1\linewidth]{0hCv.png}
+		\end{figure}
+
+Tento databázový model umožňuje efektivní správu a analýzu finančních dat o akciích a uživatelských portfoliích, což je klíčové pro funkčnost aplikace pro zpětné testování akcií.
+
+
+
+\section{Bezpečnostní a výkonnostní aspekty}
+
+Aplikace je navržena s ohledem na bezpečnost uživatelských dat a ochranu proti běžným bezpečnostním hrozbám. Využívá bezpečnostní mechanismy, které poskytuje framework Django, včetně autentizace uživatelů, ochrany před CSRF útoky a dalších opatření.
+
+\begin{itemize}
+    \item \textbf{Autentizace a autorizace} – Aplikace využívá vestavěnou autentizaci Django pro správu přihlašování uživatelů. Při přihlašování uživatel zadá své uživatelské jméno a heslo, které jsou ověřeny proti databázi uživatelů. Django automaticky šifruje hesla pomocí algoritmu bcrypt, což zajišťuje jejich bezpečné uchování. Pro ochranu přihlášení je použita funkce \texttt{login\_required}, která zajišťuje, že pouze přihlášení uživatelé mohou přistupovat k určitým částem aplikace, jako jsou portfolia uživatelů.
+    
+    \item \textbf{CSRF ochrana} – Pro ochranu proti CSRF (Cross-Site Request Forgery) útokům Django automaticky přidává tokeny do každého formuláře. Tento token musí být odeslán spolu s každým požadavkem, což brání neautorizovanému zasílání požadavků na server. Formuláře v aplikaci obsahují příkaz \texttt{\{ \% csrf\_token \% \}} pro generování a ověřování tokenů.
+    
+    \item \textbf{Šifrování dat} – Django automaticky šifruje hesla uživatelů a používá HTTPS pro šifrování komunikace mezi serverem a klientem, což zajišťuje bezpečnost přenášených dat.
+    
+    \item \textbf{Oprávnění a přístupová kontrola} – V aplikaci je implementována kontrola přístupu na základě uživatelských oprávnění. Příkladem je použití dekorátoru \texttt{@login\_required}, který zajistí, že pouze přihlášení uživatelé mohou provádět určité akce, jako je změna stavu sdílení portfolia:
+    \begin{lstlisting}[style=Python, caption= Login required] 
+@login_required
+def toggle_share(request, portfolio\_id):
+portfolio = get_object_or_404(Portfolio, user=request.user)
+portfolio.is_shared = not portfolio.is_shared
+portfolio.save()
+return redirect('view_portfolio', portfolio_id=portfolio_id)
+    \end{lstlisting}
+    Tento dekorátor zajistí, že pouze uživatel, který vlastní konkrétní portfolio, může změnit jeho stav (např. sdílení portfolia).
+    
+    \item \textbf{Další bezpečnostní opatření} – Aplikace využívá Django zabezpečené mechanismy, jako je ochrana proti SQL injection a XSS (Cross-Site Scripting). Všechny formuláře jsou ošetřeny proti těmto útokům, což zajišťuje bezpečnost aplikace.
+\end{itemize}
+
+Výkonnost aplikace je také optimalizována pro efektivní zpracování velkých objemů dat. Použití asynchronního zpracování a cachování výsledků zaručuje, že aplikace bude reagovat rychle i při vysokém zatížení.
+
+\chapter{Implementační část}
+
+
+\section{Získávání dat z externích API}
+
+
+Aplikace pro zpětné testování akcií používá externí API pro získávání historických dat a fundamentálních ukazatelů. Hlavními API, která jsou v aplikaci použita, jsou SimFin pro fundamentální data a yfinance pro historické ceny akcií.
+
+Pro získávání dat z API SimFin je použita funkce \texttt{load\_simfin\_data()}, která načítá roční finanční údaje jako příjmy, bilanční údaje, peněžní toky a historické ceny akcií. Tato data jsou následně uložena do databáze. Příklad kódu pro načítání dat vypadá takto:
+
+\begin{lstlisting}[style=Python, caption= Simfin data] 
+
+def load_simfin_data():
+income_data = sf.load(dataset='income', variant='annual', market='us',
+index=['Ticker', 'Fiscal Year'])
+balance_data = sf.load(dataset='balance', variant='annual', market='us',
+index=['Ticker','Fiscal Year'])
+shareprices_data = sf.load(dataset='shareprices', variant='daily',
+market='us', index=['Ticker', 'Date'])}
+ \end{lstlisting}
+Tato funkce načte data pro každý ticker (akcii) a uloží je do příslušných tabulek v databázi (např. \texttt{IncomeStatement}, \texttt{BalanceSheet}, \texttt{SharePrices}).
+
+\section{Výpočet finančních ukazatelů}
+
+
+Po získání dat jsou následně vypočítány klíčové finanční ukazatele, které jsou použity pro analýzu akcií a zpětné testování strategií. Výpočet těchto ukazatelů je prováděn v metodě \texttt{calculate\_ratios()}, která prochází všechny akcie a na základě dat v databázi vypočítá ukazatele jako P/E, ROA, ROE, a další.
+
+Například výpočet P/E poměru probíhá následovně:
+
+\begin{lstlisting}[style=Python, caption= Ratios] 
+def calculate_ratios():
+stocks = Stock.objects.all()
+for stock in stocks:
+income_statement = IncomeStatement.objects.filter(stock=stock).first()
+if stock.market_cap and income_statement.net_income != 0:
+stock.pe_ratio = round(stock.market_cap / income_statement.net_income, 2)}
+\end{lstlisting}
+Tato funkce pro každou akcii vypočítá P/E poměr na základě tržní kapitalizace a čistého zisku z posledního dostupného výkazu zisků a ztrát.
+
+\section{Filtrace akcií podle kritérií}
+
+
+Pro efektivní analýzu a zpětné testování je v aplikaci implementována filtrace akcií podle různých kritérií, jako jsou sektor, průmysl, a finanční ukazatele. Filtry jsou uloženy v uživatelských preferencích a aplikována na dotazy v databázi. Kód pro filtrování akcií podle vybraných parametrů vypadá takto:
+
+\begin{lstlisting}[style=Python, caption= Filtr] 
+filters = request.session.get('filters', [])
+q_object = Q()
+for f in filters:
+field = f.get('field')
+value = f.get('value')
+q_object &= Q(**{f"field)
+\end{lstlisting}
+
+Tento filtr umožňuje uživatelům vyhledávat akcie na základě různých parametrů, jako jsou \texttt{sector} nebo \texttt{industry}, a následně je použít pro zpětné testování.
+
+\section{Vizualizace a grafy}
+
+
+Aplikace umožňuje vizualizaci historických dat akcií a výsledků zpětného testování. Pro tento účel je použitá knihovna \texttt{Plotly}, která generuje interaktivní grafy. Jeden z grafů, který zobrazuje vývoj ceny akcie, je generován takto:
+
+\begin{lstlisting}[style=Python, caption= Grafy] 
+<h2 class="subtitle">Graf vývoje ceny akcie</h2>
+<div id="interactive-chart"></div>
+<script src="https://cdn.plot.lyplotly-latest.min.js"></script>
+<script>
+const chartData = {{ chart_data|safe }};
+Plotly.newPlot('interactive-chart', chartData.data, chartData.layout);
+\end{lstlisting}
+
+Tento kód využívá \texttt{Plotly} pro vykreslení interaktivního grafu, který zobrazuje data o vývoji ceny akcie na základě historických údajů. Grafy jsou dynamické a umožňují uživatelům interaktivně prozkoumávat data.
+
+
+
+\chapter{Závěr a zhodnocení}
+
+
+\section{Shrnutí výsledků}
+
+
+Cílem této práce bylo vyvinout aplikaci pro zpětné testování akcií, která by uživatelům umožnila testovat jejich investiční strategie na historických datech a analyzovat výkonnost akcií na základě různých finančních ukazatelů. Po realizaci a testování aplikace lze shrnout následující výsledky:
+
+\begin{itemize}
+    \item Aplikace úspěšně integruje dvě klíčová externí API (SimFin a yfinance) pro získávání historických dat a finančních ukazatelů.
+    \item Finanční ukazatele, jako jsou P/E, ROE, ROA, a další, jsou správně vypočítávány a uloženy do databáze pro následné použití v analýzách.
+    \item Uživatelé mají možnost definovat vlastní investiční strategie a provádět zpětné testování na historických datech.
+    \item Výsledky zpětného testování jsou generovány a vizualizovány pomocí interaktivních grafů, což zlepšuje analýzu a porozumění výsledkům.
+    \item Aplikace umožňuje uživatelům sdílet portfolia.
+\end{itemize}
+
+Aplikace tedy splňuje své základní cíle a poskytuje funkční nástroj pro zpětné testování akcií.
+
+\section{Hodnocení aplikace}
+
+
+Aplikace byla vyvinuta s důrazem na uživatelskou přívětivost, bezpečnost a výkonnost. Testování aplikace ukázalo, že všechny základní funkce, jako je získávání dat z externích API, výpočet finančních ukazatelů a zpětné testování strategií, fungují správně. Dále byly provedeny testy na výkonnost aplikace, které potvrdily, že i při vyšším zatížení dokáže aplikace správně a efektivně zpracovávat velké objemy dat.
+
+Jedním z hlavních přínosů aplikace je její flexibilita, která umožňuje uživatelům definovat vlastní investiční strategie a analyzovat je na historických datech. Výsledky zpětného testování jsou prezentovány v přehledné formě, která umožňuje uživatelům rychlou analýzu výkonnosti jejich strategií.
+
+
+\section{Možnosti budoucího vývoje}
+
+
+Vzhledem k tomu, že aplikace byla navržena s ohledem na rozšiřitelnost a flexibilitu, existuje několik možností pro její budoucí vylepšení. K těmto možnostem patří:
+
+\begin{itemize}
+    \item \textbf{Predikce pomocí AI a strojového učení} – Integrace modelů strojového učení pro predikci budoucího vývoje cen akcií na základě historických dat, klíčových finančních ukazatelů a dalších relevantních faktorů. To by uživatelům pomohlo lépe odhadnout potenciální výnosy a rizika.
+    \item \textbf{Kalendář ekonomických událostí} – Přidání interaktivního kalendáře obsahujícího významné ekonomické události, jako jsou zveřejnění výsledků společností, makroekonomická data nebo rozhodnutí centrálních bank. Tato funkcionalita by uživatelům poskytla lepší přehled o možných rizicích a příležitostech.
+    \item \textbf{Individuální zprávy pro každou akcii} – Zahrnutí sekce se souhrnem aktuálních zpráv a novinek souvisejících s každou akcií. Tímto způsobem by uživatelé mohli získat rychlý přehled o faktorech, které mohou ovlivnit cenu konkrétní akcie.
+    \item \textbf{Vážení akcií v portfoliu} – Možnost vážit jednotlivé akcie v portfoliu podle uživatelem zadaných procent. To by umožnilo simulovat reálnější investiční strategie, kde mají různé akcie různou důležitost.
+    \item \textbf{Pokročilé analýzy portfolia} – Zavedení nástrojů pro analýzu portfolia, jako je sledování celkové volatility, Sharpeho poměru nebo dalších ukazatelů, které by pomohly uživatelům optimalizovat jejich investice.
+    \item \textbf{Sledování sentimentu trhu} – Možnost analyzovat sentiment trhu pomocí zpracování textů (např. z finančních článků a zpráv). Tato funkcionalita by uživatelům pomohla identifikovat, zda převládá pozitivní, neutrální nebo negativní nálada ohledně konkrétní akcie či trhu obecně.
+    \item \textbf{Komunitní diskuse a hodnocení} – Integrované fórum nebo sekce pro komentáře by umožnily uživatelům diskutovat o investičních strategiích, ekonomických událostech nebo konkrétních akciích. Možnost hodnotit portfolia a strategie by dále podpořila interakci mezi uživateli.
+\end{itemize}
+
+Aplikace má také potenciál pro komerční využití, zejména pokud bude rozšířena o pokročilé funkce analýzy a optimalizace investičních strategií.
+
+\section{Závěr}
+
+Tato práce se zaměřila na vytvoření aplikace pro zpětné testování akcií, která by poskytovala nástroje pro analýzu akciových trhů na základě historických dat a finančních ukazatelů. Aplikace byla úspěšně navržena, implementována a otestována. Testování prokázalo správnost výpočtů a funkčnost aplikace i při velkém objemu dat.
+
+Díky implementaci flexibilních analytických nástrojů a vizualizací má aplikace vysoký potenciál pro využití v praxi a pro rozšíření o nové funkce v budoucnu. Tento projekt tak představuje silný základ pro další vývoj nástrojů pro analýzu a testování akciových strategií.
+
+ Zdrojový kód projektu je dostupný na GitHubu (https://github.com/Vojtik1/Alfint)
+
+\chapter*{Seznam použitých informačních zdrojů}
+
+\begin{itemize}
+    \item \textbf{Django Documentation} – Django Software Foundation. Dostupné z: \url{https://www.djangoproject.com/}
+    \item \textbf{yfinance Documentation} – Yahoo Finance API for Python. Dostupné z: \url{https://pypi.org/project/yfinance/}
+    \item \textbf{SimFin API Documentation} – SimFin. Dostupné z: \url{https://simfin.com/docs}
+    \item \textbf{The Intelligent Investor} – Benjamin Graham, HarperBusiness, 2003.
+    \item \textbf{Plotly: A Comprehensive Guide} – Plotly Technologies Inc. Dostupné z: \url{https://plotly.com/python/}
+    \item \textbf{ChatGPT} - ChatGPT. Dostupné z: \url{https://chatgpt.com/}
+    \item \textbf{Stack Overflow} - Stack Overflow. Dostupné z: \url{https://stackoverflow.com/}
+\end{itemize}
+
+
+
+
+\end{document}
