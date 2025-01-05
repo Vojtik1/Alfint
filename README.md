@@ -7,12 +7,14 @@ Alfint je aplikace pro zpětné testování akcií na základě uživatelsky def
 - Vizuální zobrazení výkonnosti strategie
 - Možnost úpravy a optimalizace vstupních parametrů
 - Generování reportů s výsledky zpětného testování
-- možnost stažení výsledků 
+- Vytvoření porfolia
 - Sdílení portfolia/strategie s ostatními uživateli
-- Určit období backtestu
-- Historie všech ukazatelů dané společnosti
-- kalendář událostí
+- Všechny ukazatelé dané společnosti
 - Možnost přehrát na graf ceny taky graf ukazatele
+- Vytvoření grafu z akcií v portfoliu
+- Search akcií 
+
+
 
 
 ## Co se tím naučím:
@@ -54,6 +56,13 @@ Alfint je aplikace pro zpětné testování akcií na základě uživatelsky def
 - Upravený způsob filtrování akcií - možnost odebirát a upravovat akcie
 - Paging(stránkování), kvůli dlouhému načítání filteru
 - Vylepšená grafika a celkově UI
+
+## Možná vylepšení:
+- Možnost stažení výsledků
+- Určit období backtestu
+- Kalendář událostí
+- Komentovata lajkovat strategie
+- Docker
 
 
 ### Instalace:
