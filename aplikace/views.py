@@ -742,5 +742,5 @@ def toggle_share(request, portfolio_id):
 
 def load_data_command():
     load_simfin_data()
-    # load_yfinance_data()
+    load_yfinance_data()
     calculate_ratios()

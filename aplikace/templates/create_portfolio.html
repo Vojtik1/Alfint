@@ -267,55 +267,56 @@ form.box {
     loadStocks(currentPage);
 
     document.getElementById('stock_search').addEventListener('input', function() {
-        const query = this.value.trim();
-        if (query.length > 1) {
-            fetch(`/stock_suggestions/?q=${encodeURIComponent(query)}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log(data); // Debug: Podívej se na odpověď serveru v konzoli prohlížeče
-                    const suggestions = document.getElementById('suggestions');
-                    suggestions.innerHTML = '';
+    const query = this.value.trim();
+    if (query.length > 1) {
+        fetch(`/stock_suggestions/?q=${encodeURIComponent(query)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data); // Debug: Kontrola dat v konzoli
+                const suggestions = document.getElementById('suggestions');
+                suggestions.innerHTML = ''; // Vymaže staré návrhy
 
-                    if (data.length === 0) {
+                if (data.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'No stocks found.';
+                    li.classList.add('box', 'mt-2', 'p-2');
+                    suggestions.appendChild(li);
+                } else {
+                    data.forEach(stock => {
                         const li = document.createElement('li');
-                        li.textContent = 'No stocks found.';
+                        li.innerHTML = `
+                            ${stock.ticker} - ${stock.name}
+                            <form method="post" action="{% url 'add_stock_to_portfolio' %}" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="ticker" value="${stock.ticker}">
+                                <div class="select" style="display:inline;">
+                                    <select name="portfolio_id" required>
+                                        {% for portfolio in user.portfolios.all %}
+                                            <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="button is-link is-light" style="margin-left: 10px;">Add to Portfolio</button>
+                            </form>
+                        `;
                         li.classList.add('box', 'mt-2', 'p-2');
+                        li.style.cursor = 'pointer';
                         suggestions.appendChild(li);
-                    } else {
-                        data.forEach(stock => {
-                            const li = document.createElement('li');
-                            li.innerHTML = `
-                                ${stock.ticker} - ${stock.name}
-                                <form method="post" action="{% url 'add_stock_to_portfolio' %}" style="display:inline;">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="ticker" value="${stock.ticker}">
-                                    <div class="select" style="display:inline;">
-                                        <select name="portfolio_id" required>
-                                            {% for portfolio in user.portfolios.all %}
-                                                <option value="{{ portfolio.id }}">{{ portfolio.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="button is-link is-light" style="margin-left: 10px;">Add to Portfolio</button>
-                                </form>
-                            `;
-                            li.classList.add('box', 'mt-2', 'p-2');
-                            li.style.cursor = 'pointer';
-                            suggestions.appendChild(li);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('There has been a problem with your fetch operation:', error);
-                });
-        } else {
-            document.getElementById('suggestions').innerHTML = '';
-        }
-    });
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('There has been a problem with your fetch operation:', error);
+            });
+    } else {
+        document.getElementById('suggestions').innerHTML = '';
+    }
+});
+
 </script>
 {% endblock %}
