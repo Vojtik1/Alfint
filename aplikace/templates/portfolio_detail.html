@@ -140,15 +140,14 @@
                                 </td>
                                 <td>
                                     <input
-    type="number"
-    name="weights_{{ item.stock.ticker }}"
-    value="{{ item.weight|floatformat:2 }}"
-    class="input is-small"
-    step="0.01"
-    min="0"
-    max="100"
-/>
-                                    
+                                        type="number"
+                                        name="weights_{{ item.stock.ticker }}"
+                                        value="{{ item.weight|floatformat:2 }}"
+                                        class="input is-small"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                    />
                                 </td>
                             </tr>
                         {% endfor %}
@@ -170,7 +169,14 @@
             <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
             <script>
                 const chartData = {{ chart_data|safe }};
-                Plotly.newPlot('interactive-chart', chartData.data, chartData.layout);
+                console.log("Data pro graf:", chartData);  // Debugging
+
+                // Testování, zda jsou data pro graf správná
+                if (chartData && chartData.data) {
+                    Plotly.newPlot('interactive-chart', chartData.data, chartData.layout);
+                } else {
+                    console.log("Data pro graf nejsou k dispozici nebo jsou prázdná.");
+                }
             </script>
         {% else %}
             <p>Žádné dostupné údaje pro vytvoření grafu.</p>
@@ -189,6 +195,7 @@
         </div>
     </div>
 </section>
+
 
 
 

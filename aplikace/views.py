@@ -651,15 +651,12 @@ def view_portfolio(request, portfolio_id):
     portfolio = get_object_or_404(Portfolio, id=portfolio_id)
     portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio)
 
-    # Debugging: Zkontrolujte, zda portfolio má nějaké akcie
-    print("Počet akcií v portfoliu:", portfolio_stocks.count())
-
     # Výpočet vážené návratnosti portfolia
     avg_return = calculate_portfolio_return(portfolio)
 
     # Načítání a příprava dat pro graf
     prices_data = {}
-    stocks = []  # Seznam akcií s dodatečnými údaji, jako váha a návratnost
+    stocks = []
     for stock_item in portfolio_stocks:
         stock = Stock.objects.filter(ticker=stock_item.ticker).first()
         if not stock:
@@ -673,10 +670,6 @@ def view_portfolio(request, portfolio_id):
             if first_price and last_price and first_price != 0:
                 stock_return = ((last_price - first_price) / first_price) * 100
 
-        # Debugging: Zkontrolujte hodnoty akcie a její váhu
-        print(f"Akcie: {stock.ticker}, Váha: {stock_item.weight}")
-
-        # Přidání akcie s návratností a váhou
         stocks.append({
             'stock': stock,
             'return': stock_return,
@@ -698,12 +691,27 @@ def view_portfolio(request, portfolio_id):
 
     # Převod na DataFrame
     df = pd.DataFrame(prices_data).sort_index()
-    df['ETF'] = (df.mean(axis=1) / df.mean(axis=1).iloc[0]) * 100
 
-    # Vytvoření grafu
+    # Inicializace váhového seznamu podle akcií v portfoliu
+    weights = {item['stock'].ticker: item['weight'] for item in stocks}
+
+    # Přepočet denních cen podle vah
+    weighted_prices = pd.DataFrame()
+    for ticker in df.columns:
+        if ticker in weights:
+            weighted_prices[ticker] = df[ticker] * weights[ticker] / 100
+
+    # Výpočet vážené ceny pro ETF
+    df['ETF'] = weighted_prices.sum(axis=1)
+
+    # Normalizace ETF hodnot na procenta vůči první hodnotě
+    df['ETF'] = df['ETF'] / df['ETF'].iloc[0] * 100
+
+    # Vytvoření grafu s Plotly
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['ETF'], mode='lines', name='Pomyslné ETF'))
     chart_data = fig.to_json()
+    print(chart_data)
 
     # Kontext
     context = {
@@ -713,6 +721,10 @@ def view_portfolio(request, portfolio_id):
         'chart_data': chart_data,
     }
     return render(request, 'portfolio_detail.html', context)
+
+
+
+
 
 
 
@@ -765,17 +777,29 @@ def calculate_portfolio_return(portfolio):
 
 from django.http import HttpResponse
 
+@login_required
 def update_weights(request, portfolio_id):
     portfolio = get_object_or_404(Portfolio, id=portfolio_id)
+    portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio)
+
     if request.method == 'POST':
-        for item in portfolio.stocks.all():
-            weight_key = f'weights_{item.ticker}'
-            weight_value = request.POST.get(weight_key)
-            if weight_value:
-                item.weight = float(weight_value)
-                item.save()
+        # Debugging: Zobraz hodnoty POST
+        print("Přijaté váhy:")
+        for stock_item in portfolio_stocks:
+            stock_ticker = stock_item.ticker
+            new_weight = request.POST.get(f'weights_{stock_ticker}')
+            print(f"Ticker: {stock_ticker}, Nová váha: {new_weight}")
+
+            if new_weight is not None:
+                stock_item.weight = float(new_weight)
+                stock_item.save()
+
+        # Debugging: Zobraz uložené váhy
+        for stock_item in portfolio_stocks:
+            print(f"Po uložení: {stock_item.ticker}, Váha: {stock_item.weight}")
 
     return redirect('view_portfolio', portfolio_id=portfolio.id)
+
 
 
 
