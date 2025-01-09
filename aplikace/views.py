@@ -648,20 +648,24 @@ def add_all_filtered_to_portfolio(request):
 
 @login_required
 def view_portfolio(request, portfolio_id):
-    # Načtení portfolia bez omezení na vlastníka
     portfolio = get_object_or_404(Portfolio, id=portfolio_id)
-
-    # Načítání akcií v portfoliu
     portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio)
 
-    # Načítání dat o cenách pro všechny akcie
-    prices_data = {}
-    stocks = []  # Seznam akcií v portfoliu s dodatečnými údaji
-    for stock_item in portfolio_stocks:
-        stock = get_object_or_404(Stock, ticker=stock_item.ticker)
-        share_prices = SharePrices.objects.filter(stock=stock).order_by('date')
+    # Debugging: Zkontrolujte, zda portfolio má nějaké akcie
+    print("Počet akcií v portfoliu:", portfolio_stocks.count())
 
-        # Výpočet návratnosti pro konkrétní akcii
+    # Výpočet vážené návratnosti portfolia
+    avg_return = calculate_portfolio_return(portfolio)
+
+    # Načítání a příprava dat pro graf
+    prices_data = {}
+    stocks = []  # Seznam akcií s dodatečnými údaji, jako váha a návratnost
+    for stock_item in portfolio_stocks:
+        stock = Stock.objects.filter(ticker=stock_item.ticker).first()
+        if not stock:
+            continue
+
+        share_prices = SharePrices.objects.filter(stock=stock).order_by('date')
         stock_return = None
         if share_prices.exists():
             first_price = share_prices.first().close_price
@@ -669,52 +673,49 @@ def view_portfolio(request, portfolio_id):
             if first_price and last_price and first_price != 0:
                 stock_return = ((last_price - first_price) / first_price) * 100
 
-            # Uložení dat o cenách pro analýzu
-            prices_data[stock.ticker] = {price.date: price.close_price for price in share_prices}
+        # Debugging: Zkontrolujte hodnoty akcie a její váhu
+        print(f"Akcie: {stock.ticker}, Váha: {stock_item.weight}")
 
-        # Přidáme akcii do seznamu s návratností
+        # Přidání akcie s návratností a váhou
         stocks.append({
             'stock': stock,
-            'return': stock_return,  # Návratnost akcie
+            'return': stock_return,
+            'weight': stock_item.weight,  # Váha akcie
         })
 
-    # Pokud nejsou žádné ceny, ukončíme funkci
+        if share_prices.exists():
+            prices_data[stock.ticker] = {price.date: price.close_price for price in share_prices}
+
+    # Pokud nejsou žádná data, vykreslíme stránku bez grafu
     if not prices_data:
         context = {
             'portfolio': portfolio,
             'stocks': stocks,
-            'avg_return': None,
+            'avg_return': avg_return,
             'chart_data': None,
         }
         return render(request, 'portfolio_detail.html', context)
 
-    # Převod dat do DataFrame
+    # Převod na DataFrame
     df = pd.DataFrame(prices_data).sort_index()
+    df['ETF'] = (df.mean(axis=1) / df.mean(axis=1).iloc[0]) * 100
 
-    # Vypočítáme průměrnou hodnotu každý den (ignorujeme NaN hodnoty)
-    df['ETF'] = df.mean(axis=1)
-
-    # Normalizace na první den (pomyslné ETF začíná na hodnotě 100)
-    df['ETF'] = (df['ETF'] / df['ETF'].iloc[0]) * 100
-
-    # Vytvoření dat pro interaktivní graf
+    # Vytvoření grafu
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df.index, y=df['ETF'], mode='lines', name='Pomyslné ETF'))
-
-    # Převod grafu do JSON
     chart_data = fig.to_json()
 
-    # Průměrná návratnost portfolia
-    avg_return = ((df['ETF'].iloc[-1] - df['ETF'].iloc[0]) / df['ETF'].iloc[0]) * 100
-
-    # Kontext pro šablonu
+    # Kontext
     context = {
         'portfolio': portfolio,
-        'stocks': stocks,  # Seznam akcií s návratností
+        'stocks': stocks,  # Zde předáváme správný seznam akcií s návratností a váhami
         'avg_return': avg_return,
-        'chart_data': chart_data,  # Data pro interaktivní graf
+        'chart_data': chart_data,
     }
     return render(request, 'portfolio_detail.html', context)
+
+
+
 
 
 @login_required
@@ -733,6 +734,51 @@ def toggle_share(request, portfolio_id):
     portfolio.is_shared = not portfolio.is_shared
     portfolio.save()
     return redirect('view_portfolio', portfolio_id=portfolio_id)
+
+from django.core.exceptions import ValidationError
+
+def validate_weights(portfolio):
+    total_weight = sum(stock.weight for stock in portfolio.stocks.all())
+    if not (0.99 <= total_weight <= 1.01):  # Tolerance kvůli zaokrouhlení
+        raise ValidationError("Součet vah akcií v portfoliu musí být 1 (100 %).")
+
+def calculate_portfolio_return(portfolio):
+    total_return = 0
+
+    for stock_item in portfolio.stocks.all():
+        # Najdeme akcii a její ceny
+        stock = Stock.objects.filter(ticker=stock_item.ticker).first()
+        if not stock:
+            continue  # Pokud akcie neexistuje, přeskočíme ji
+
+        share_prices = SharePrices.objects.filter(stock=stock).order_by('date')
+        if share_prices.exists():
+            # Výpočet návratnosti
+            first_price = share_prices.first().close_price
+            last_price = share_prices.last().close_price
+
+            if first_price and last_price and first_price != 0:
+                stock_return = ((last_price - first_price) / first_price) 
+                total_return += stock_return * stock_item.weight
+
+    return total_return
+
+from django.http import HttpResponse
+
+def update_weights(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id)
+    if request.method == 'POST':
+        for item in portfolio.stocks.all():
+            weight_key = f'weights_{item.ticker}'
+            weight_value = request.POST.get(weight_key)
+            if weight_value:
+                item.weight = float(weight_value)
+                item.save()
+
+    return redirect('view_portfolio', portfolio_id=portfolio.id)
+
+
+
 
 
 # to run this just use command prompt and:

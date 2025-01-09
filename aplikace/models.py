@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -183,6 +184,8 @@ class Portfolio(models.Model):
 class PortfolioStock(models.Model):
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='stocks')
     ticker = models.CharField(max_length=10)
+    weight = models.FloatField(default=0)
+    quantity = models.FloatField(default=0)
 
     class Meta:
         verbose_name = "Portfolio Stock"
@@ -190,3 +193,14 @@ class PortfolioStock(models.Model):
 
     def __str__(self):
         return f"{self.ticker} in {self.portfolio}"
+
+    def clean(self):
+        # Zkontroluj, zda součet vah v portfoliu nepřesahuje 100 %
+        total_weight = sum(stock.weight for stock in self.portfolio.stocks.exclude(pk=self.pk)) + self.weight
+        if total_weight > 100.0:
+            raise ValidationError("Součet vah akcií v portfoliu nemůže být větší než 100 %.")
+
+    def save(self, *args, **kwargs):
+        # Před uložením validuj
+        self.full_clean()
+        super().save(*args, **kwargs)

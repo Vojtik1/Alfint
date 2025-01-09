@@ -17,6 +17,9 @@ urlpatterns = [
     path('user_portfolios/', views.user_portfolios, name='user_portfolios'),
     path('portfolio/<int:portfolio_id>/', views.view_portfolio, name='view_portfolio'),
     path('portfolio/<int:portfolio_id>/toggle_share/', views.toggle_share, name='toggle_share'),
+    path('update_weights/<int:portfolio_id>/', views.update_weights, name='update_weights'),
+
+
 
 ]
 

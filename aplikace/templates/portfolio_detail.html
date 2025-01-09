@@ -104,38 +104,65 @@
         <h2 class="subtitle">Detaily o akciích v portfoliu</h2>
         <h2 class="subtitle">Průměrný výnos portfolia: {{ avg_return|floatformat:2 }}%</h2>
 
-        <table class="table is-fullwidth">
-            <thead>
-                <tr>
-                    <th>Název akcie</th>
-                    <th>Ticker</th>
-                    <th>Tržní kapitalizace</th>
-                    <th>P/E Ratio</th>
-                    <th>ROE (%)</th>
-                    <th>Debt to Equity Ratio</th>
-                    <th>Performance (%)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if stocks %}
-                    {% for item in stocks %}
-                        <tr>
-                            <td><a href="{% url 'stock_detail' item.stock.ticker %}" class="has-text-link">{{ item.stock.name }}</a></td>
-                            <td>{{ item.stock.ticker }}</td>
-                            <td>{{ item.stock.market_cap|floatformat:2|default:"N/A" }}</td>
-                            <td>{{ item.stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
-                            <td>{{ item.stock.roe|floatformat:2|default:"N/A" }}</td>
-                            <td>{{ item.stock.debt_to_equity|floatformat:2|default:"N/A" }}</td>
-                            <td>{% if item.return %} {{ item.return|floatformat:2 }} {% else %} Není k dispozici {% endif %}</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
+        <form method="post" action="{% url 'update_weights' portfolio_id=portfolio.id %}">
+            {% csrf_token %}
+            <table class="table is-fullwidth">
+                <thead>
                     <tr>
-                        <td colspan="7" class="has-text-centered">Žádné akcie v portfoliu.</td>
+                        <th>Název akcie</th>
+                        <th>Ticker</th>
+                        <th>Tržní kapitalizace</th>
+                        <th>P/E Ratio</th>
+                        <th>ROE (%)</th>
+                        <th>Debt to Equity Ratio</th>
+                        <th>Performance (%)</th>
+                        <th>Váha (%)</th>
                     </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% if stocks %}
+                        {% for item in stocks %}
+                            <tr>
+                                <td>
+                                    <a href="{% if item.stock.ticker %}{% url 'stock_detail' item.stock.ticker %}{% else %}#{% endif %}" class="has-text-link">{{ item.stock.name }}</a>
+                                </td>
+                                <td>{{ item.stock.ticker }}</td>
+                                <td>{{ item.stock.market_cap|floatformat:2|default:"N/A" }}</td>
+                                <td>{{ item.stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
+                                <td>{{ item.stock.roe|floatformat:2|default:"N/A" }}</td>
+                                <td>{{ item.stock.debt_to_equity|floatformat:2|default:"N/A" }}</td>
+                                <td>
+                                    {% if item.return %}
+                                        {{ item.return|floatformat:2 }}
+                                    {% else %}
+                                        Není k dispozici
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <input
+    type="number"
+    name="weights_{{ item.stock.ticker }}"
+    value="{{ item.weight|floatformat:2 }}"
+    class="input is-small"
+    step="0.01"
+    min="0"
+    max="100"
+/>
+                                    
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="has-text-centered">Žádné akcie v portfoliu.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <div class="buttons">
+                <button type="submit" class="button is-primary">Uložit váhy</button>
+            </div>
+        </form>
 
         <h2 class="subtitle">Graf vývoje ceny pomyslného ETF</h2>
         {% if chart_data %}
@@ -162,5 +189,7 @@
         </div>
     </div>
 </section>
+
+
 
 {% endblock %}
