@@ -170,7 +170,8 @@ class CustomUser(AbstractUser):
 class Portfolio(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='portfolios')
     name = models.CharField(max_length=255, default='My Portfolio')
-    is_shared = models.BooleanField(default=False)
+    is_shared = models.BooleanField(default=False, blank=True, null=False)
+    is_hearted = models.BooleanField(default=False, blank=True, null=False)
 
     class Meta:
         unique_together = ('user', 'name')
@@ -201,6 +202,10 @@ class PortfolioStock(models.Model):
             raise ValidationError("Součet vah akcií v portfoliu nemůže být větší než 100 %.")
 
     def save(self, *args, **kwargs):
-        # Před uložením validuj
-        self.full_clean()
+        if self.weight == 0:  # Pokud je váha 0, nastavíme na stejnou hodnotu pro všechny akcie
+            portfolio_size = PortfolioStock.objects.count()
+            if portfolio_size > 0:
+                self.weight = 100 / portfolio_size  # Stejná váha pro všechny akcie
+            else:
+                self.weight = 0  # Pokud není žádná akcie, nastavíme 0
         super().save(*args, **kwargs)

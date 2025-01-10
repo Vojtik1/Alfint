@@ -509,6 +509,13 @@ def main_page(request):
     }
     return render(request, 'main_page.html', context)
 
+def heart_portfolio(request, portfolio_id):
+    portfolio = Portfolio.objects.get(id=portfolio_id)
+    portfolio.is_hearted = not portfolio.is_hearted  # Přepne hodnotu is_hearted
+    portfolio.save()
+
+    return JsonResponse({'is_hearted': portfolio.is_hearted})
+
 
 def create_portfolio(request):
     if request.method == 'POST':
@@ -693,25 +700,44 @@ def view_portfolio(request, portfolio_id):
     df = pd.DataFrame(prices_data).sort_index()
 
     # Inicializace váhového seznamu podle akcií v portfoliu
-    weights = {item['stock'].ticker: item['weight'] for item in stocks}
+    weights = {stock_item.ticker: stock_item.weight for stock_item in portfolio_stocks}
 
-    # Přepočet denních cen podle vah
+    # Debugging: Zobrazíme váhy
+    print("Weights:", weights)
+
+    # Celkový součet vah v portfoliu
+    total_weight = sum(weights.values())
+
+    # Pokud celkový součet vah není 100%, normalizujeme váhy na 100%
+    normalized_weights = {ticker: (weight / total_weight) * 100 for ticker, weight in weights.items()}
+
+    # Debugging: Normalizované váhy
+    print("Normalized Weights:", normalized_weights)
+
+    # Přepočet denních cen podle normalizovaných vah
     weighted_prices = pd.DataFrame()
     for ticker in df.columns:
-        if ticker in weights:
-            weighted_prices[ticker] = df[ticker] * weights[ticker] / 100
+        if ticker in normalized_weights:
+            weighted_prices[ticker] = df[ticker] * normalized_weights[ticker] / 100
 
     # Výpočet vážené ceny pro ETF
-    df['ETF'] = weighted_prices.sum(axis=1)
+    df['ETF_weighted'] = weighted_prices.sum(axis=1)
+
+    # Debugging: Zobrazíme vážené ceny pro ETF
+    print("ETF Weighted Prices:", df['ETF_weighted'])
 
     # Normalizace ETF hodnot na procenta vůči první hodnotě
-    df['ETF'] = df['ETF'] / df['ETF'].iloc[0] * 100
+    df['ETF_normalized'] = (df['ETF_weighted'] / df['ETF_weighted'].iloc[0]) * 100
+
+    # Debugging: Zobrazíme normalizovaný ETF výsledek
+    print("ETF Normalized:", df['ETF_normalized'])
 
     # Vytvoření grafu s Plotly
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df.index, y=df['ETF'], mode='lines', name='Pomyslné ETF'))
+    fig.add_trace(go.Scatter(x=df.index, y=df['ETF_normalized'], mode='lines', name='Pomyslné ETF'))
     chart_data = fig.to_json()
-    print(chart_data)
+
+
 
     # Kontext
     context = {
@@ -721,13 +747,6 @@ def view_portfolio(request, portfolio_id):
         'chart_data': chart_data,
     }
     return render(request, 'portfolio_detail.html', context)
-
-
-
-
-
-
-
 
 
 @login_required
@@ -777,29 +796,33 @@ def calculate_portfolio_return(portfolio):
 
 from django.http import HttpResponse
 
+
 @login_required
 def update_weights(request, portfolio_id):
     portfolio = get_object_or_404(Portfolio, id=portfolio_id)
     portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio)
 
     if request.method == 'POST':
-        # Debugging: Zobraz hodnoty POST
-        print("Přijaté váhy:")
+        errors = []
         for stock_item in portfolio_stocks:
             stock_ticker = stock_item.ticker
             new_weight = request.POST.get(f'weights_{stock_ticker}')
-            print(f"Ticker: {stock_ticker}, Nová váha: {new_weight}")
 
             if new_weight is not None:
-                stock_item.weight = float(new_weight)
-                stock_item.save()
+                try:
+                    stock_item.weight = float(new_weight)
+                    stock_item.save()  # Validace proběhne přes `clean` metodu
+                except ValidationError as e:
+                    errors.append(f"Chyba u akcie {stock_ticker}: {e}")
 
-        # Debugging: Zobraz uložené váhy
-        for stock_item in portfolio_stocks:
-            print(f"Po uložení: {stock_item.ticker}, Váha: {stock_item.weight}")
+        if errors:
+            for error in errors:
+                messages.error(request, error)
+        else:
+            messages.success(request, "Váhy byly úspěšně aktualizovány.")
 
+    # Přesměrování zpět na detail portfolia
     return redirect('view_portfolio', portfolio_id=portfolio.id)
-
 
 
 

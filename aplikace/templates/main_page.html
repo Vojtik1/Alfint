@@ -104,6 +104,14 @@
                         <div class="portfolio-box">
                             <a href="{% url 'view_portfolio' portfolio.id %}">{{ portfolio.name }}</a>
                             <p>Shared by {{ portfolio.user.username }}</p>
+                            <!-- Ikona srdíčka -->
+                            <span class="heart-icon" data-portfolio-id="{{ portfolio.id }}">
+                                {% if portfolio.is_hearted %}
+                                    ❤️
+                                {% else %}
+                                    🤍
+                                {% endif %}
+                            </span>
                         </div>
                     {% endfor %}
                 {% else %}
@@ -112,6 +120,29 @@
             </div>
         </div>
     </div>
+
+    <script>
+      document.querySelectorAll('.heart-icon').forEach(icon => {
+        icon.addEventListener('click', function() {
+          const portfolioId = icon.getAttribute('data-portfolio-id');
+
+          fetch(`/heart-portfolio/${portfolioId}/`, {
+            method: 'GET',
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Pokud je srdíčko "osrdíčkované", změníme ikonu
+            if (data.is_hearted) {
+              icon.innerHTML = '❤️';  // Plné srdíčko
+            } else {
+              icon.innerHTML = '🤍';  // Prázdné srdíčko
+            }
+          });
+        });
+      });
+    </script>
+</body>
+
 
 
 
