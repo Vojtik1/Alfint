@@ -197,6 +197,7 @@ def load_yfinance_data():
                 'previousClose')
             stock.market_cap = yf_info.get('marketCap')
             stock.pe_ratio = yf_info.get('trailingPE')
+            stock.description = yf_info.get('longBusinessSummary', 'No description available')
             stock.ebitda = yf_info.get('ebitda')
             stock.beta = yf_info.get('beta')
             stock.enterprise_value = yf_info.get('enterpriseValue')
@@ -834,6 +835,6 @@ def update_weights(request, portfolio_id):
 # load_data_command()
 
 def load_data_command():
-    load_simfin_data()
+  #  load_simfin_data()
     load_yfinance_data()
-    calculate_ratios()
+   # calculate_ratios()

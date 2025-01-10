@@ -34,6 +34,7 @@ class Stock(models.Model):
     price_to_book_ratio = models.FloatField(null=True, blank=True)
     ev_to_revenue_ratio = models.FloatField(null=True, blank=True)
     altman_z_score = models.FloatField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
 
 
     class Meta:
