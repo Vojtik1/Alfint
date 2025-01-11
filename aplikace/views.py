@@ -658,7 +658,6 @@ def add_all_filtered_to_portfolio(request):
                     q_object &= Q(**{f"{field}__iexact": value})
                 else:
                     q_object &= Q(**{f"{field}__{operator}": float(value)})
-
             except (ValueError, TypeError):
                 continue
 
@@ -673,10 +672,17 @@ def add_all_filtered_to_portfolio(request):
     portfolio = Portfolio.objects.get(id=portfolio_id)
 
     # Přidání všech akcií do portfolia
+    portfolio_size = len(tickers_to_add)
     for ticker in tickers_to_add:
-        PortfolioStock.objects.get_or_create(portfolio=portfolio, ticker=ticker)
+        portfolio_stock, created = PortfolioStock.objects.get_or_create(portfolio=portfolio, ticker=ticker)
+        if created:  # Pokud byla akcie právě přidána
+            portfolio_stock.weight = 100 / portfolio_size
+            portfolio_stock.save()
 
-    return JsonResponse({'success': True})
+    return redirect('view_portfolio', portfolio_id=portfolio.id)
+
+
+
 
 
 @login_required
@@ -728,8 +734,6 @@ def view_portfolio(request, portfolio_id):
     # Inicializace váhového seznamu podle akcií v portfoliu
     weights = {stock_item.ticker: stock_item.weight for stock_item in portfolio_stocks}
 
-    # Debugging: Zobrazíme váhy
-    print("Weights:", weights)
 
     # Celkový součet vah v portfoliu
     total_weight = sum(weights.values())
@@ -737,8 +741,6 @@ def view_portfolio(request, portfolio_id):
     # Pokud celkový součet vah není 100%, normalizujeme váhy na 100%
     normalized_weights = {ticker: (weight / total_weight) * 100 for ticker, weight in weights.items()}
 
-    # Debugging: Normalizované váhy
-    print("Normalized Weights:", normalized_weights)
 
     # Přepočet denních cen podle normalizovaných vah
     weighted_prices = pd.DataFrame()

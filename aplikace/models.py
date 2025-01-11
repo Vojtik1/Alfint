@@ -204,9 +204,20 @@ class PortfolioStock(models.Model):
 
     def save(self, *args, **kwargs):
         if self.weight == 0:  # Pokud je váha 0, nastavíme na stejnou hodnotu pro všechny akcie
-            portfolio_size = PortfolioStock.objects.count()
+            portfolio_size = self.portfolio.stocks.count()
+
             if portfolio_size > 0:
                 self.weight = 100 / portfolio_size  # Stejná váha pro všechny akcie
             else:
                 self.weight = 0  # Pokud není žádná akcie, nastavíme 0
         super().save(*args, **kwargs)
+
+
+
+
+
+
+
+
+
+
