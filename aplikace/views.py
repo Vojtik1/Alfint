@@ -329,6 +329,11 @@ def stock_detail(request, ticker):
     stock.industry = yf_info.get('industry')
     stock.save()
 
+    # Načtení relevantních zpráv z Finnhub
+    api_key = 'tvůj_api_klíč'  # Nahraďte skutečným API klíčem
+    all_news = get_stock_news(ticker, api_key)
+    relevant_news = all_news if all_news else []
+
     # Načtení historických cen akcií
     share_prices = SharePrices.objects.filter(stock=stock)
     close_prices = [
@@ -362,10 +367,30 @@ def stock_detail(request, ticker):
         'income_statements': income_statements,
         'balance_sheets': balance_sheets,
         'cash_flow_statements': cash_flow_statements,
+        'ticker': ticker,
+        'news': relevant_news,
     }
 
     return render(request, 'stock_detail.html', context)
 
+
+def get_stock_news(symbol, api_key):
+    api_key = "cu1brjhr01qqr3sgeqt0cu1brjhr01qqr3sgeqtg"
+    url = f"https://finnhub.io/api/v1/company-news"
+    params = {
+        'symbol': symbol,
+        'from': '2025-01-01',  # Datum od kdy chcete zprávy (např. od začátku roku)
+        'to': '2025-01-10',    # Datum do kdy chcete zprávy
+        'token': api_key
+    }
+    response = requests.get(url, params=params)
+
+    if response.status_code == 200:
+        news_data = response.json()
+        return news_data
+    else:
+        print(f"Chyba při získávání novinek: {response.status_code}")
+        return None
 
 def calculate_ratios():
     print("Calculating financial ratios...")
@@ -824,6 +849,42 @@ def update_weights(request, portfolio_id):
 
     # Přesměrování zpět na detail portfolia
     return redirect('view_portfolio', portfolio_id=portfolio.id)
+
+
+
+
+
+import requests
+def fetch_news(ticker):
+    api_key = "cu1brjhr01qqr3sgeqt0cu1brjhr01qqr3sgeqtg"
+    url = f"https://finnhub.io/api/v1/news?category=general&token={api_key}"  # Můžete upravit na jiný endpoint
+    response = requests.get(url)
+    if response.status_code == 200:
+        news = response.json()
+
+
+        return news
+
+    return []
+
+
+
+def filter_news_by_ticker(news, ticker):
+    ticker = ticker.upper()  # Standardizace tickeru
+    filtered_news = []
+
+    for item in news:
+        # Zkontrolujeme zda existují klíče, pokud ne, použijeme prázdný řetězec
+        headline = item.get('headline', '').upper()
+        summary = item.get('summary', '').upper()
+
+        # Hledáme ticker v headline nebo summary
+        if ticker in headline or ticker in summary:
+            filtered_news.append(item)
+
+    print(f"Filtered news for {ticker}: {filtered_news}")  # Debug výpis
+    return filtered_news
+
 
 
 
