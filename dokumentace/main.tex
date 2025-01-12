@@ -62,6 +62,7 @@
   {}
 
 % Nastavení mezer před a za nadpisy
+\setlength{\parindent}{0pt}
 \titlespacing*{\chapter}{0pt}{-30pt}{8pt}  % Zmenšeno z 20pt na 8pt
 \titlespacing*{\section}{0pt}{12pt}{4pt}   % Zmenšeno z 20pt/10pt na 12pt/4pt
 \titlespacing*{\subsection}{0pt}{12pt}{4pt} % Zmenšeno z 20pt/10pt na 12pt/4pt
@@ -355,7 +356,7 @@
 %% Stránka obsahující abstrakt (anotaci)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%	
 \noindent{\Large{\bfseries{Abstrakt}\\}}
-Tato práce se zaměřuje na vývoj aplikace pro zpětné testování akcií na základě uživatelsky definovaných parametrů. Aplikace je implementována v jazyce Python s využitím frameworku Django a API SimFin a yfinance. Umožňuje analyzovat historická data, sdílet portfolia a vizualizovat je v přehledné podobě. Dokumentace popisuje architekturu aplikace, implementační detaily a způsoby řešení. Důraz je kladen na přesnost výpočtů a uživatelskou přívětivost. 
+Tato práce se zabývá vývojem aplikace pro zpětné testování akcií na základě uživatelsky definovaných parametrů. Aplikace je vyvinuta v jazyce Python s využitím frameworku Django a API SimFin a yfinance, což umožňuje kombinovat historická a aktuální data akcií. Hlavní funkcionality zahrnují analýzu historických dat, výpočet klíčových finančních ukazatelů, vizualizaci výsledků a možnost sdílení portfolií mezi uživateli. Dokumentace popisuje architekturu aplikace, implementační detaily a zvolené metody řešení. Kladen je důraz na přesnost výpočtů, přehlednou vizualizaci dat a uživatelskou přívětivost.
 
 \vspace{18pt}
 \noindent{\large{\bfseries{Klíčová slova}}}
@@ -386,213 +387,333 @@ UI & User Interface.\\
 \chapter*{ÚVOD}
 \addcontentsline{toc}{chapter}{Úvod}
 
-\introsubheading{Představení projektu}
-V současné době, kdy roste zájem o investování a analýzu akciového trhu, je zpětné testování strategií nezbytným nástrojem pro investory. Tento projekt byl vytvořen s cílem poskytnout uživatelům snadno ovladatelnou aplikaci, která umožňuje analyzovat historická data akcií, vypočítávat finanční indikátory a vytvářet přehledné vizualizace. Aplikace je implementována v Pythonu s využitím frameworku Django, API SimFin a yfinance.
+Investování a analýza akciového trhu se v posledních letech stávají stále populárnějšími. S rostoucím zájmem o tuto oblast roste i potřeba nástrojů, které by investorům umožnily lépe pochopit trh, analyzovat historická data a testovat své investiční strategie. Tento projekt byl vytvořen jako aplikace, která kombinuje historická data akcií, finanční ukazatele a vizualizace tak, aby uživatelé mohli získat ucelený přehled o výkonu jednotlivých akcií.
 
-\introsubheading{Motivace}
-Hlavní motivací pro vytvoření této aplikace byla osobní zkušenost s nedostatky dostupných nástrojů pro zpětné testování akcií. Většina stávajících řešení postrádá možnost kombinace dat z různých zdrojů a vizualizace klíčových finančních ukazatelů. Cílem bylo vytvořit nástroj, který by nabídl komplexní analýzu a zároveň byl uživatelsky přívětivý.
+Hlavní funkcionalitou aplikace je integrace dat z API SimFin a yfinance, díky čemuž je možné kombinovat historická a aktuální data. Taky byla přidána i možnost sledovat aktuální ekonomické zprávy, což uživatelům umožňuje získat širší kontext pro rozhodování. Součástí aplikace je rovněž zpětné testování strategií a sdílení portfolií mezi uživateli.
 
-\introsubheading{Cíle projektu}
-Hlavním cílem bylo vytvořit aplikaci, která umožní:
-\begin{itemize}
-    \item Analyzovat historická data akcií a finančních ukazatelů,
-    \item Vypočítávat klíčové indikátory, jako jsou P/E, ROE, EPS a další,
-    \item Vizualizovat data prostřednictvím grafů a přehledných tabulek,
-    \item Kombinovat data z více zdrojů (SimFin, yfinance),
-    \item Poskytnout uživatelům nástroj pro testování investičních strategií,
-    \item Sdílet mezi sebou portfolia.
-\end{itemize}
-
-\introsubheading{Struktura práce}
-Práce je rozdělena do několika hlavních částí. První kapitola se zabývá teoretickou částí, která popisuje klíčové finanční ukazatele a jejich význam při zpětném testování akcií. Druhá kapitola se věnuje návrhu aplikace, včetně použité architektury, databázového modelu a výběru technologií. Třetí kapitola popisuje implementační část, kde jsou detailně rozebrány funkce aplikace, integrace API a výpočet ukazatelů. Čtvrtá kapitola shrnuje dosažené výsledky a uzavírá práci pohledem na budoucí rozvoj projektu.
+Motivací pro vytvoření této aplikace bylo nejen vyřešit nedostatky stávajících nástrojů, ale také lépe pochopit, jak investiční trh funguje. Tento projekt mi umožnil nejen prohloubit mé technické dovednosti, ale také získat nové znalosti v oblasti investování a finanční analýzy.
 
 \chapter{Teoretická část}
 
+\section{Co je to akcie}
+Akcie představuje podíl na vlastnictví společnosti, který držitele opravňuje k účasti na jejím zisku (např. prostřednictvím dividend) a hlasování na valné hromadě. Akciové trhy umožňují obchodování s akciemi, jejichž cena je určována nabídkou a poptávkou. Akcie jsou klíčovým nástrojem pro budování kapitálu jak pro společnosti, tak pro investory.
+
+\subsection{Výhody investování do akcií}
+Investování do akcií přináší různé výhody, mezi které patří:
+\begin{itemize}
+    \item \textbf{Možnost zhodnocení kapitálu:} Dlouhodobé investování do akcií může přinést vyšší výnosy ve srovnání s jinými typy aktiv.
+    \item \textbf{Pasivní příjmy:} Prostřednictvím dividend mohou investoři získávat pravidelné příjmy.
+    \item \textbf{Diversifikace portfolia:} Akcie umožňují investorům diverzifikovat rizika napříč různými sektory a regiony.
+\end{itemize}
 
 \section{Principy zpětného testování akcií}
+Zpětné testování (backtesting) je metoda, která simuluje výkonnost investiční strategie na základě historických dat.
 
-
-Zpětné testování (backtesting) je klíčovým nástrojem v oblasti finančního investování, který umožňuje ověřit účinnost různých investičních strategií na historických datech. Tento proces poskytuje cenné informace o tom, jak by se strategie chovala v reálných tržních podmínkách, pokud by byla aplikována v minulosti. Základním principem zpětného testování je analýza historických cen akcií, ziskovosti a dalších ukazatelů, které umožňují modelovat chování akcií a simulovat různé obchodní scénáře.
-
-\section{Finanční ukazatele}
-
-Finanční ukazatele jsou zásadní pro analýzu výkonnosti společnosti a rozhodování o investicích. V rámci zpětného testování se zaměřujeme na ukazatele, které poskytují přehled o hodnotě, stabilitě a růstovém potenciálu společnosti. Některé z nejdůležitějších ukazatelů zahrnují:
-
+\subsection{Hlavní kroky zpětného testování}
 \begin{itemize}
-    \item \textbf{P/E (Price-to-Earnings Ratio)} – Poměr ceny akcie k jejímu zisku na akcii. Tento ukazatel je často používán k určení, zda je akcie přiměřeně oceněná na základě jejího zisku. Vyšší P/E může znamenat, že investoři očekávají vysoký růst společnosti, zatímco nízké P/E může naznačovat podhodnocení.
-    
-    \item \textbf{ROE (Return on Equity)} – Tento ukazatel ukazuje, jak efektivně společnost využívá kapitál investovaný jejími akcionáři. Vyšší ROE obvykle signalizuje silnou výkonnost společnosti, což může být pozitivním signálem pro investory.
-
-    \item \textbf{EPS (Earnings per Share)} – Zisk na akcii je jedním z nejzákladnějších ukazatelů výkonnosti společnosti. Ukazuje, kolik zisku společnost vydělala na jednu akcii. Tento ukazatel je důležitý pro hodnocení profitability společnosti.
-
-    \item \textbf{P/B (Price-to-Book Ratio)} – Poměr ceny akcie k její účetní hodnotě. Tento ukazatel se používá pro analýzu toho, jak je akcie oceněná ve vztahu k jejím aktivům. Poměr menší než 1 může naznačovat podhodnocení akcie.
-
-    \item \textbf{PEG (Price-to-Earnings Growth Ratio)} – Tento ukazatel kombinuje P/E s růstem zisku. Pomáhá určit, zda je akcie přiměřeně oceněná na základě očekávaného růstu zisku, což poskytuje vyváženější pohled než samotný P/E.
-
-    \item \textbf{Debt-to-Equity Ratio (D/E)} – Poměr dluhu k vlastnímu kapitálu ukazuje, jak společnost financuje své aktivity. Vyšší poměr znamená větší závislost na cizích zdrojích financování, což může znamenat vyšší riziko.
+    \item \textbf{Výběr historických dat:} Zahrnuje získání dat o cenách akcií, objemech obchodů a finančních ukazatelích.
+    \item \textbf{Definování strategie:} Stanovení pravidel pro nákup a prodej akcií.
+    \item \textbf{Simulace obchodování:} Aplikace strategie na historická data za účelem analýzy.
+    \item \textbf{Vyhodnocení výsledků:} Analýza výnosů, rizik a dalších metrik strategie.
 \end{itemize}
 
-\section{Metoda zpětného testování}
-
-
-Zpětné testování se provádí tak, že se na historických datech testuje vybraná investiční strategie. Proces zahrnuje následující kroky:
+\subsection{Výhody zpětného testování}
 \begin{itemize}
-    \item \textbf{Výběr historických dat} – Získání historických cen akcií a dalších relevantních finančních dat pro dané období.
-    \item \textbf{Implementace strategie} – Definování a aplikování obchodní strategie na základě vybraných ukazatelů (např. P/E, ROE).
-    \item \textbf{Simulace obchodních rozhodnutí} – Vytváření simulace, která na základě historických dat a strategie simuluje nákup a prodeje akcií.
-    \item \textbf{Vyhodnocení výsledků} – Analýza výsledků zpětného testování, zhodnocení výnosů a rizik spojených se strategií.
-\end{itemize}
-
-\section{Historie zpětného testování}
-
-
-Historie zpětného testování sahá až do 70. let 20. století, kdy byly první pokusy o testování obchodních strategií na historických datech prováděny manuálně. S rozvojem výpočetní techniky se zpětné testování stalo mnohem dostupnější a přesnější. V současnosti se používají sofistikované algoritmy a programy, které umožňují rychlé a efektivní testování strategií na velkých historických datech.
-
-\section{Závěr}
-
-
-Zpětné testování je neocenitelný nástroj pro každého investora, který chce ověřit efektivitu své obchodní strategie na historických datech. Kombinace správných finančních ukazatelů, analýzy historických dat a využití pokročilých technik zpětného testování pomáhá minimalizovat rizika a maximalizovat potenciální výnosy.
-
-\chapter{Návrh řešení}
-
-
-\section{Architektura aplikace}
-
-
-Architektura aplikace byla navržena s cílem zajistit modularitu, škálovatelnost a efektivní správu dat. Aplikace je postavena na frameworku Django, který je doplněn knihovnami jako yfinance pro získávání aktuálních a historických dat a SimFin pro přístup k finančním ukazatelům. Celková architektura aplikace zahrnuje následující komponenty:
-
-\begin{itemize}
-    \item \textbf{Frontend} – Uživatelské rozhraní aplikace je navrženo tak, aby bylo přehledné a intuitivní. Umožňuje uživatelům zadávat parametry pro zpětné testování a zobrazuje výsledky ve formě tabulek a grafů.
-    \item \textbf{Backend} – Backend je zodpovědný za získávání dat z externích API (SimFin a yfinance), výpočty finančních ukazatelů a správu databáze. Django REST framework je použit pro vytvoření API pro komunikaci mezi frontendem a backendem.
-    \item \textbf{Databáze} – Databáze je navržena tak, aby uchovávala historická data o akciích, obchodní strategie a výsledky zpětného testování. Používá se PostgreSQL pro její robustnost a škálovatelnost.
-    \item \textbf{Grafy a vizualizace} – Pro vizualizaci výsledků zpětného testování jsou použity knihovny jako Matplotlib a Plotly. Grafy umožňují uživatelům snadno analyzovat výsledky obchodních strategií.
-\end{itemize}
-
-\section{Použité technologie}
-
-
-Aplikace využívá několik moderních technologií pro efektivní získávání dat, jejich analýzu a vizualizaci. Mezi hlavní technologie použité v aplikaci patří:
-
-\begin{itemize}
-    \item \textbf{Django} – Framework pro vývoj webových aplikací, který umožňuje rychlý vývoj a snadnou správu backendu aplikace. Django poskytuje robustní strukturu pro zpracování požadavků, správu databáze a zabezpečení aplikace.
-    \item \textbf{yfinance} – Knihovna pro získávání historických a aktuálních dat o akciích z Yahoo Finance. Tato knihovna je klíčová pro získání historických cen akcií a dalších relevantních dat pro zpětné testování.
-    \item \textbf{SimFin} – API pro získávání finančních ukazatelů a fundamentálních dat o akciích. SimFin poskytuje přístup k datům, které jsou užitečné pro výpočet ukazatelů jako P/E, ROE, EPS a dalších.
-    \item \textbf{PostgreSQL} – Relational database management system, který je použit pro správu dat o akciích, uživatelských strategiích a výsledcích testování. PostgreSQL byla zvolena pro svou spolehlivost, výkon a schopnost pracovat s velkými objemy dat.
-    \item \textbf{Matplotlib a Plotly} – Knihovny pro tvorbu grafů a vizualizací, které jsou použity pro zobrazení výsledků zpětného testování a historických dat.
+    \item \textbf{Ověření strategie:} Umožňuje otestovat výkonnost strategie před jejím nasazením do praxe.
+    \item \textbf{Identifikace rizik:} Odhaluje slabiny strategie.
+    \item \textbf{Optimalizace:} Pomáhá doladit parametry strategie pro lepší výsledky.
 \end{itemize}
 
 \section{Databázový model}
+Databázový model aplikace je klíčový pro ukládání a správu dat o akciích, uživatelích a jejich portfoliích.
 
-
-Databázový model aplikace je navržen tak, aby efektivně uchovával všechna potřebná data pro zpětné testování akcií a správu uživatelských portfolií. Model obsahuje několik hlavních tabulek, které uchovávají informace o akciích, jejich finančních ukazatelích a dalších relevantních údajích.
-
-\begin{figure}[h]
-			\centering
-			\includegraphics[width=1\linewidth]{0hCv.png}
-		\end{figure}
-
-Tento databázový model umožňuje efektivní správu a analýzu finančních dat o akciích a uživatelských portfoliích, což je klíčové pro funkčnost aplikace pro zpětné testování akcií.
-
-
-
-\section{Bezpečnostní a výkonnostní aspekty}
-
-Aplikace je navržena s ohledem na bezpečnost uživatelských dat a ochranu proti běžným bezpečnostním hrozbám. Využívá bezpečnostní mechanismy, které poskytuje framework Django, včetně autentizace uživatelů, ochrany před CSRF útoky a dalších opatření.
-
+\subsection{Architektura databáze}
+Databáze je postavena na relačním modelu s tabulkami propojenými primárními a cizími klíči. Model zahrnuje:
 \begin{itemize}
-    \item \textbf{Autentizace a autorizace} – Aplikace využívá vestavěnou autentizaci Django pro správu přihlašování uživatelů. Při přihlašování uživatel zadá své uživatelské jméno a heslo, které jsou ověřeny proti databázi uživatelů. Django automaticky šifruje hesla pomocí algoritmu bcrypt, což zajišťuje jejich bezpečné uchování. Pro ochranu přihlášení je použita funkce \texttt{login\_required}, která zajišťuje, že pouze přihlášení uživatelé mohou přistupovat k určitým částem aplikace, jako jsou portfolia uživatelů.
-    
-    \item \textbf{CSRF ochrana} – Pro ochranu proti CSRF (Cross-Site Request Forgery) útokům Django automaticky přidává tokeny do každého formuláře. Tento token musí být odeslán spolu s každým požadavkem, což brání neautorizovanému zasílání požadavků na server. Formuláře v aplikaci obsahují příkaz \texttt{\{ \% csrf\_token \% \}} pro generování a ověřování tokenů.
-    
-    \item \textbf{Šifrování dat} – Django automaticky šifruje hesla uživatelů a používá HTTPS pro šifrování komunikace mezi serverem a klientem, což zajišťuje bezpečnost přenášených dat.
-    
-    \item \textbf{Oprávnění a přístupová kontrola} – V aplikaci je implementována kontrola přístupu na základě uživatelských oprávnění. Příkladem je použití dekorátoru \texttt{@login\_required}, který zajistí, že pouze přihlášení uživatelé mohou provádět určité akce, jako je změna stavu sdílení portfolia:
-    \begin{lstlisting}[style=Python, caption= Login required] 
-@login_required
-def toggle_share(request, portfolio\_id):
-portfolio = get_object_or_404(Portfolio, user=request.user)
-portfolio.is_shared = not portfolio.is_shared
-portfolio.save()
-return redirect('view_portfolio', portfolio_id=portfolio_id)
-    \end{lstlisting}
-    Tento dekorátor zajistí, že pouze uživatel, který vlastní konkrétní portfolio, může změnit jeho stav (např. sdílení portfolia).
-    
-    \item \textbf{Další bezpečnostní opatření} – Aplikace využívá Django zabezpečené mechanismy, jako je ochrana proti SQL injection a XSS (Cross-Site Scripting). Všechny formuláře jsou ošetřeny proti těmto útokům, což zajišťuje bezpečnost aplikace.
+    \item \textbf{Tabulku akcií:} Obsahuje informace o názvu, tickeru, sektoru a dalších vlastnostech.
+    \item \textbf{Tabulku historických dat:} Ukládá denní ceny a objemy obchodů.
+    \item \textbf{Tabulku portfolií:} Ukládá informace o portfoliích uživatelů a váhách jednotlivých akcií.
 \end{itemize}
 
-Výkonnost aplikace je také optimalizována pro efektivní zpracování velkých objemů dat. Použití asynchronního zpracování a cachování výsledků zaručuje, že aplikace bude reagovat rychle i při vysokém zatížení.
+\subsection{Diagram databázového modelu}
+Diagram znázorňuje vztahy mezi tabulkami a poskytuje přehled o struktuře databáze:
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{minimal_model.png}
+    \caption{ER diagram databázového modelu}
+\end{figure}
 
-\chapter{Implementační část}
-
-
-\section{Získávání dat z externích API}
-
-
-Aplikace pro zpětné testování akcií používá externí API pro získávání historických dat a fundamentálních ukazatelů. Hlavními API, která jsou v aplikaci použita, jsou SimFin pro fundamentální data a yfinance pro historické ceny akcií.
-
-Pro získávání dat z API SimFin je použita funkce \texttt{load\_simfin\_data()}, která načítá roční finanční údaje jako příjmy, bilanční údaje, peněžní toky a historické ceny akcií. Tato data jsou následně uložena do databáze. Příklad kódu pro načítání dat vypadá takto:
-
-\begin{lstlisting}[style=Python, caption= Simfin data] 
-
-def load_simfin_data():
-income_data = sf.load(dataset='income', variant='annual', market='us',
-index=['Ticker', 'Fiscal Year'])
-balance_data = sf.load(dataset='balance', variant='annual', market='us',
-index=['Ticker','Fiscal Year'])
-shareprices_data = sf.load(dataset='shareprices', variant='daily',
-market='us', index=['Ticker', 'Date'])}
- \end{lstlisting}
-Tato funkce načte data pro každý ticker (akcii) a uloží je do příslušných tabulek v databázi (např. \texttt{IncomeStatement}, \texttt{BalanceSheet}, \texttt{SharePrices}).
-
-\section{Výpočet finančních ukazatelů}
+\section{Historie zpětného testování}
+Zpětné testování vzniklo v 70. letech s rozvojem výpočetní techniky. Zpočátku bylo prováděno manuálně, ale s nástupem počítačů a algoritmů se stalo dostupnějším a přesnějším. Dnes umožňuje testovat komplexní strategie na rozsáhlých historických datech.
 
 
-Po získání dat jsou následně vypočítány klíčové finanční ukazatele, které jsou použity pro analýzu akcií a zpětné testování strategií. Výpočet těchto ukazatelů je prováděn v metodě \texttt{calculate\_ratios()}, která prochází všechny akcie a na základě dat v databázi vypočítá ukazatele jako P/E, ROA, ROE, a další.
+\chapter{Použité technologie}
 
-Například výpočet P/E poměru probíhá následovně:
+Tento projekt byl realizován s využitím moderních technologií a nástrojů, které umožnily efektivní vývoj, správu a testování aplikace. Níže jsou popsány klíčové technologie, které byly při vývoji použity.
 
-\begin{lstlisting}[style=Python, caption= Ratios] 
+\section{Webový framework Django}
+Django je robustní a škálovatelný framework pro vývoj webových aplikací v Pythonu. Byl zvolen díky:
+\begin{itemize}
+    \item \textbf{Modulární architektuře}, která usnadňuje rozšiřitelnost aplikace.
+    \item \textbf{Integrovanému ORM (Object-Relational Mapping)}, které umožňuje snadnou práci s databází.
+    \item \textbf{Vestavěným nástrojům} pro správu uživatelů, zabezpečení a další základní funkce.
+\end{itemize}
+Django poskytuje rychlý vývoj, robustní bezpečnostní prvky a čistý kód, což činí aplikaci snadno udržitelnou a rozšiřitelnou.
+
+\section{Databázový systém SQLite}
+SQLite je lehký relační databázový systém, který byl zvolen pro tento projekt díky následujícím výhodám:
+\begin{itemize}
+    \item \textbf{Jednoduché integraci} s Django frameworkem.
+    \item \textbf{Nízkým nárokům na údržbu}, jelikož nevyžaduje samostatný databázový server.
+    \item \textbf{Přenositelnosti}, což umožňuje snadné sdílení databázových souborů mezi vývojovým a produkčním prostředím.
+\end{itemize}
+
+\section{Finanční API}
+Pro zajištění přístupu k historickým a aktuálním finančním datům byly použity následující API:
+
+\subsection{SimFin API}
+SimFin API poskytuje historické finanční ukazatele a fundamentální data o společnostech. Tato API nám umožnila získávat strukturovaná data o výkonnosti společností, jako jsou tržby, ziskovost, cash flow a další klíčové ukazatele. Využití tohoto API pomohlo efektivně načítat data o akciích pro zpětné testování investičních strategií a pro analýzu trendů v oblasti financí.
+
+\subsection{yFinance API}
+yFinance API poskytuje aktuální tržní data o akciích, včetně cen akcií, objemů obchodů, dividendových výnosů a dalších informací. Tato API se ukázala jako cenný nástroj pro získávání živých dat pro analýzu a zobrazení aktuálního stavu trhů.
+
+\subsection{Finnhub API}
+Finnhub API poskytuje širokou škálu dat, včetně fundamentálních údajů, historických cen, tržních zpráv a dalších finančních ukazatelů. Tento nástroj byl použit pro získávání podrobných informací o akciových titulech a pro poskytnutí širšího spektra dat pro analýzu výkonnosti a strategické plánování.
+
+\section{Vizualizace dat pomocí Plotly}
+Pro vizualizaci finančních dat a výsledků zpětného testování byla použita knihovna \textbf{Plotly}. Tato knihovna umožňuje vytvářet interaktivní grafy a diagramy, které jsou užitečné pro analýzu historických cen akcií, porovnání různých strategií a zobrazení výkonnosti portfolia. Výhody použití Plotly zahrnují:
+\begin{itemize}
+    \item \textbf{Interaktivitu}, která umožňuje uživatelům snadno zkoumat data kliknutím a přiblížením.
+    \item \textbf{Různé typy grafů}, včetně časových řad, histogramů a scatter plotů.
+    \item Možnost \textbf{dynamického přizpůsobení grafů} na základě uživatelských preferencí.
+\end{itemize}
+
+
+
+
+
+\chapter{Návrh řešení}
+
+\section{Frontend}
+
+Frontend aplikace je navržen s cílem poskytnout uživatelům přehledné, intuitivní a interaktivní prostředí pro správu jejich portfolií a analýzu akcií. Důraz byl kladen na jednoduchost uživatelského rozhraní, které umožní snadnou navigaci mezi různými funkcemi aplikace.
+
+\subsection{Přihlašování uživatele}
+
+Uživatelé se do aplikace přihlašují pomocí uživatelského jména a hesla. Tento proces je implementován s využitím Django autentizačního systému. Po úspěšném přihlášení uživatel získá přístup ke svému portfoliu, kde může spravovat akcie a jejich váhy.
+
+% Tady bude fotka přihlašovacího formuláře
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{login.png}
+    \caption{Login}
+\end{figure}
+
+\subsection{Sdílení portfolia}
+
+Jednou z klíčových funkcí aplikace je možnost sdílení portfolia mezi uživateli. Uživatel může označit své portfolio jako veřejné, což umožní ostatním uživatelům podívat se na jeho výběr akcií. Tento proces je implementován pomocí tlačítka „Sdílet portfolio“, které mění stav portfolia na veřejný. Po sdílení portfolia je možné získat odkaz pro jeho zobrazení.
+
+% Tady bude fotka sdíleného portfolia
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{shared.png}
+    \caption{Sdílení portfolií}
+\end{figure}
+
+\subsection{Filtr akcií}
+
+Frontend obsahuje filtrování akcií podle různých parametrů, jako je sektor, průmysl, a finanční ukazatele. Filtr se nachází v bočním panelu a umožňuje uživatelům rychle najít akcie, které odpovídají jejich kritériím. Po aplikaci filtrů se výsledky automaticky aktualizují.
+
+% Tady bude fotka filtru akcií
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{filter.png}
+    \caption{Filtrování akcií}
+\end{figure}
+
+\subsection{Vyhledávání akcií}
+
+Vyhledávání akcií je klíčovou funkcí aplikace, která umožňuje uživatelům rychle najít konkrétní akcie podle tickeru nebo názvu společnosti. Po zadání názvu nebo tickeru se na stránce automaticky zobrazí výsledky, které odpovídají zadanému hledanému výrazu.
+
+% Tady bude fotka vyhledávacího pole
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{<TADY BUDE FOTKA VYHLEDAVACIH_PODLE_TICKERU>}
+\end{figure}
+
+\subsection{Detail akcie}
+
+Stránka s detailem akcie poskytuje uživatelům všechny relevantní informace o konkrétní akcii, včetně historických cen, finančních ukazatelů, grafů a nejnovějších zpráv týkající se dané akcie. Grafy ukazují vývoj vybraných finančních ukazatelů v průběhu času, což pomáhá uživatelům při analýze výkonu akcie.
+
+% Tady bude fotka detailu akcie
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{detail1.png}
+    \caption{Detail akcie}
+\end{figure}
+
+\subsection{Grafy a vizualizace}
+
+Aplikace používá grafy pro zobrazení historických dat akcií, jako jsou ceny, P/E poměr, ROE, a další indikátory. Grafy jsou interaktivní a umožňují uživatelům detailně analyzovat trendy a historické výkony jednotlivých akcií.
+
+% Tady bude fotka grafu
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1\linewidth]{graf.png}
+    \caption{Graf}
+\end{figure}
+
+\section{Backend}
+
+Backend aplikace je zodpovědný za správu dat, autentizaci uživatelů, a logiku aplikace. Používá Django jako framework pro vývoj webových aplikací a Python pro zpracování dat.
+
+\subsection{Přihlašování uživatele}
+
+Backend je zodpovědný za autentizaci uživatele pomocí Django autentizačního systému. Po přihlášení je uživatelovi přiřazena relace, která uchovává informace o jeho stavu přihlášení. Kód pro přihlášení uživatele vypadá takto:
+
+\begin{lstlisting}[style=Python, caption= Kód pro přihlášení uživatele]
+def signup(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('main_page')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'signup.html', {'form': form})
+\end{lstlisting}
+
+\subsection{Správa portfolií}
+
+Backend umožňuje správu portfolií, která obsahují akcie a jejich váhy. Uživatelé mohou vytvářet nová portfolia, přidávat akcie a měnit jejich váhy. Tento proces je řízen pomocí API, které komunikuje s databází.
+
+\begin{lstlisting}[style=Python, caption= Kód pro správu portfolií]
+@login_required
+def view_portfolio(request, portfolio_id):
+    portfolio = get_object_or_404(Portfolio, id=portfolio_id)
+    portfolio_stocks = PortfolioStock.objects.filter(portfolio=portfolio)
+
+    # Výpočet vážené návratnosti portfolia
+    avg_return = calculate_portfolio_return(portfolio)
+
+    # Načítání a příprava dat pro graf
+    prices_data = {}
+    stocks = []
+    for stock_item in portfolio_stocks:
+        stock = Stock.objects.filter(ticker=stock_item.ticker).first()
+        if not stock:
+            continue
+
+        share_prices = SharePrices.objects.filter(stock).order_by('date')
+        stock_return = None
+        if share_prices.exists():
+            first_price = share_prices.first().close_price
+            last_price = share_prices.last().close_price
+            if first_price and last_price and first_price != 0:
+        stock_return = ((last_price - first_price) / first_price) * 100
+
+        stocks.append({
+            'stock': stock,
+            'return': stock_return,
+            'weight': stock_item.weight,  # Váha akcie
+        })
+\end{lstlisting}
+
+\subsection{Filtrace akcií}
+
+Backend poskytuje funkci pro filtrování akcií podle zadaných parametrů. Filtrované výsledky se následně vrátí na frontend a zobrazí uživatelovi.
+
+\begin{lstlisting}[style=Python, caption= Kód pro filtr akcií]
+    for f in filters:
+        field = f.get('field')
+        operator = f.get('operator', 'gte')
+        value = f.get('value')
+
+        if field and value:
+            try:
+                if field in ['sector', 'industry']:
+                    q_object &= Q(**{f"{field}__iexact": value})
+            else:
+                q_object &= Q(**{f"{field}__{operator}": float(value)})
+            except (ValueError, TypeError):
+                continue
+    stocks = Stock.objects.filter(q_object).order_by('-market_cap')
+\end{lstlisting}
+
+\subsection{Získávání dat z externích API}
+
+Aplikace získává data o akciích a jejich finančních ukazatelích z externích API, jako je SimFin a yfinance. Backend zajišťuje komunikaci s těmito API, načítání dat a jejich ukládání do databáze. Kód pro načítání dat z API vypadá následovně:
+
+\begin{lstlisting}[style=Python, caption= Kód pro získávání dat z API]
+ef load_simfin_data():
+    print("Starting to load SimFin data...")
+
+    try:
+        # Načtení dat z API SimFin
+    income_data = sf.load(dataset='income', variant='annual', market='us', 
+    index=['Ticker', 'Fiscal Year'])
+    
+    balance_data = sf.load(dataset='balance', variant='annual',
+    market='us', index=['Ticker', 'Fiscal Year'])
+    
+    cashflow_data = sf.load(dataset='cashflow', variant='annual',
+    market='us', index=['Ticker', 'Fiscal Year'])
+    
+    shareprices_data = sf.load(dataset='shareprices', variant='daily', 
+    market='us', index=['Ticker', 'Date'])
+
+        tickers = income_data.index.get_level_values('Ticker').unique()
+\end{lstlisting}
+
+\subsection{Výpočet finančních ukazatelů}
+
+Po získání dat z API backend vypočítá klíčové finanční ukazatele, jako je P/E poměr, ROE, atd. Tyto ukazatele jsou následně uloženy v databázi pro pozdější analýzu.
+
+\begin{lstlisting}[style=Python, caption= Kód pro výpočet finančních ukazatelů]
 def calculate_ratios():
-stocks = Stock.objects.all()
-for stock in stocks:
-income_statement = IncomeStatement.objects.filter(stock=stock).first()
-if stock.market_cap and income_statement.net_income != 0:
-stock.pe_ratio = round(stock.market_cap / income_statement.net_income, 2)}
-\end{lstlisting}
-Tato funkce pro každou akcii vypočítá P/E poměr na základě tržní kapitalizace a čistého zisku z posledního dostupného výkazu zisků a ztrát.
+    print("Calculating financial ratios...")
+    stocks = Stock.objects.all()
+    for stock in stocks:
+        try:
+            # Načtení finančních dat
+    income_statement = IncomeStatement.objects.filter(stock=stock)
+    balance_sheet = BalanceSheet.objects.filter(stock=stock)
+    cash_flow_statement = CashFlowStatement.objects.filter(stock=stock)
 
-\section{Filtrace akcií podle kritérií}
-
-
-Pro efektivní analýzu a zpětné testování je v aplikaci implementována filtrace akcií podle různých kritérií, jako jsou sektor, průmysl, a finanční ukazatele. Filtry jsou uloženy v uživatelských preferencích a aplikována na dotazy v databázi. Kód pro filtrování akcií podle vybraných parametrů vypadá takto:
-
-\begin{lstlisting}[style=Python, caption= Filtr] 
-filters = request.session.get('filters', [])
-q_object = Q()
-for f in filters:
-field = f.get('field')
-value = f.get('value')
-q_object &= Q(**{f"field)
+    if income_statement and balance_sheet:
+    # P/E Ratio
+if stock.market_cap and income_statement.net_income 
+and income_statement.net_income != 0:
+stock.pe_ratio = round(stock.market_cap / income_statement.net_income, 2)
+                    ...
 \end{lstlisting}
 
-Tento filtr umožňuje uživatelům vyhledávat akcie na základě různých parametrů, jako jsou \texttt{sector} nebo \texttt{industry}, a následně je použít pro zpětné testování.
+\subsection{Grafy a vizualizace}
 
-\section{Vizualizace a grafy}
+Backend zajišťuje generování dat pro grafy, které jsou následně odesílány na frontend. K tomu využívá knihovny jako Matplotlib nebo Plotly pro generování vizualizací.
 
+\begin{lstlisting}[style=Python, caption= Kód pro generování grafů]
+def create_price_chart(close_prices):
+    dates = [price['date'] for price in close_prices]
+    prices = [price['close_price'] for price in close_prices]
 
-Aplikace umožňuje vizualizaci historických dat akcií a výsledků zpětného testování. Pro tento účel je použitá knihovna \texttt{Plotly}, která generuje interaktivní grafy. Jeden z grafů, který zobrazuje vývoj ceny akcie, je generován takto:
+    # Vytvoření grafu
+    fig, ax = plt.subplots()
+    ax.plot(dates, prices, label='Close Price')
 
-\begin{lstlisting}[style=Python, caption= Grafy] 
-<h2 class="subtitle">Graf vývoje ceny akcie</h2>
-<div id="interactive-chart"></div>
-<script src="https://cdn.plot.lyplotly-latest.min.js"></script>
-<script>
-const chartData = {{ chart_data|safe }};
-Plotly.newPlot('interactive-chart', chartData.data, chartData.layout);
+    ax.set(xlabel='Date', ylabel='Close Price',
+           title='Stock Price Over Time')
+    ax.grid()
+
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    image_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    buf.close()
+
+    return image_base64
 \end{lstlisting}
-
-Tento kód využívá \texttt{Plotly} pro vykreslení interaktivního grafu, který zobrazuje data o vývoji ceny akcie na základě historických údajů. Grafy jsou dynamické a umožňují uživatelům interaktivně prozkoumávat data.
-
 
 
 \chapter{Závěr a zhodnocení}
@@ -600,25 +721,17 @@ Tento kód využívá \texttt{Plotly} pro vykreslení interaktivního grafu, kte
 
 \section{Shrnutí výsledků}
 
+Cílem této práce bylo vyvinout aplikaci pro zpětné testování akcií, která umožňuje uživatelům testovat investiční strategie na historických datech a analyzovat výkonnost akcií na základě různých finančních ukazatelů. Po realizaci a testování aplikace lze shrnout následující výsledky:
 
-Cílem této práce bylo vyvinout aplikaci pro zpětné testování akcií, která by uživatelům umožnila testovat jejich investiční strategie na historických datech a analyzovat výkonnost akcií na základě různých finančních ukazatelů. Po realizaci a testování aplikace lze shrnout následující výsledky:
+Aplikace úspěšně integruje dvě klíčová externí API, SimFin a yfinance, která slouží k získávání historických dat a finančních ukazatelů. Mezi těmito ukazateli jsou například P/E, ROE, ROA, a další, které jsou správně vypočítány a uloženy v databázi pro následné použití v analýzách.
 
-\begin{itemize}
-    \item Aplikace úspěšně integruje dvě klíčová externí API (SimFin a yfinance) pro získávání historických dat a finančních ukazatelů.
-    \item Finanční ukazatele, jako jsou P/E, ROE, ROA, a další, jsou správně vypočítávány a uloženy do databáze pro následné použití v analýzách.
-    \item Uživatelé mají možnost definovat vlastní investiční strategie a provádět zpětné testování na historických datech.
-    \item Výsledky zpětného testování jsou generovány a vizualizovány pomocí interaktivních grafů, což zlepšuje analýzu a porozumění výsledkům.
-    \item Aplikace umožňuje uživatelům sdílet portfolia.
-\end{itemize}
+Uživatelé mají možnost definovat vlastní investiční strategie a provádět zpětné testování na historických datech, přičemž výsledky jsou generovány a vizualizovány pomocí interaktivních grafů. Tyto grafy zlepšují analýzu a porozumění výsledkům zpětného testování. Uživatelé mohou přidávat akcie do portfolia buď ručně, nebo pomocí filtru, který umožňuje výběr akcií podle různých kritérií.
 
-Aplikace tedy splňuje své základní cíle a poskytuje funkční nástroj pro zpětné testování akcií.
+Dalšími funkcemi aplikace jsou detailní zobrazení akcií, které zahrnuje historické cenové grafy, základní finanční ukazatele, výpočty jako P/E, ROIC, PEG, EPS, a další. V případě, že některé údaje nejsou k dispozici, aplikace správně zobrazuje hodnotu None místo N/A. Uživatelé mohou také přidávat váhy jednotlivým akciím v portfoliu a grafy se automaticky aktualizují podle těchto váh. Navíc je možné přidávat „srdíčko“ k portfoliím, což je jednoduché označení oblíbených portfolií.
 
-\section{Hodnocení aplikace}
+Aplikace také umožňuje uživatelům sdílet portfolia, což poskytuje možnost spolupráce a výměny investičních strategií s ostatními uživateli.
 
-
-Aplikace byla vyvinuta s důrazem na uživatelskou přívětivost, bezpečnost a výkonnost. Testování aplikace ukázalo, že všechny základní funkce, jako je získávání dat z externích API, výpočet finančních ukazatelů a zpětné testování strategií, fungují správně. Dále byly provedeny testy na výkonnost aplikace, které potvrdily, že i při vyšším zatížení dokáže aplikace správně a efektivně zpracovávat velké objemy dat.
-
-Jedním z hlavních přínosů aplikace je její flexibilita, která umožňuje uživatelům definovat vlastní investiční strategie a analyzovat je na historických datech. Výsledky zpětného testování jsou prezentovány v přehledné formě, která umožňuje uživatelům rychlou analýzu výkonnosti jejich strategií.
+Aplikace tedy splňuje své základní cíle a poskytuje funkční nástroj pro zpětné testování akcií a analýzu jejich výkonnosti.
 
 
 \section{Možnosti budoucího vývoje}
@@ -629,8 +742,6 @@ Vzhledem k tomu, že aplikace byla navržena s ohledem na rozšiřitelnost a fle
 \begin{itemize}
     \item \textbf{Predikce pomocí AI a strojového učení} – Integrace modelů strojového učení pro predikci budoucího vývoje cen akcií na základě historických dat, klíčových finančních ukazatelů a dalších relevantních faktorů. To by uživatelům pomohlo lépe odhadnout potenciální výnosy a rizika.
     \item \textbf{Kalendář ekonomických událostí} – Přidání interaktivního kalendáře obsahujícího významné ekonomické události, jako jsou zveřejnění výsledků společností, makroekonomická data nebo rozhodnutí centrálních bank. Tato funkcionalita by uživatelům poskytla lepší přehled o možných rizicích a příležitostech.
-    \item \textbf{Individuální zprávy pro každou akcii} – Zahrnutí sekce se souhrnem aktuálních zpráv a novinek souvisejících s každou akcií. Tímto způsobem by uživatelé mohli získat rychlý přehled o faktorech, které mohou ovlivnit cenu konkrétní akcie.
-    \item \textbf{Vážení akcií v portfoliu} – Možnost vážit jednotlivé akcie v portfoliu podle uživatelem zadaných procent. To by umožnilo simulovat reálnější investiční strategie, kde mají různé akcie různou důležitost.
     \item \textbf{Pokročilé analýzy portfolia} – Zavedení nástrojů pro analýzu portfolia, jako je sledování celkové volatility, Sharpeho poměru nebo dalších ukazatelů, které by pomohly uživatelům optimalizovat jejich investice.
     \item \textbf{Sledování sentimentu trhu} – Možnost analyzovat sentiment trhu pomocí zpracování textů (např. z finančních článků a zpráv). Tato funkcionalita by uživatelům pomohla identifikovat, zda převládá pozitivní, neutrální nebo negativní nálada ohledně konkrétní akcie či trhu obecně.
     \item \textbf{Komunitní diskuse a hodnocení} – Integrované fórum nebo sekce pro komentáře by umožnily uživatelům diskutovat o investičních strategiích, ekonomických událostech nebo konkrétních akciích. Možnost hodnotit portfolia a strategie by dále podpořila interakci mezi uživateli.
